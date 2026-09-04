@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/ColdHam.Core/ColdHam.Core.csproj" />
+  <Project Path="src/ColdHam.Windows/ColdHam.Windows.csproj" />
+  <Project Path="src/ColdHam.App/ColdHam.App.csproj" />
+  <Project Path="tests/ColdHam.Core.Tests/ColdHam.Core.Tests.csproj" />
+</Solution>
+
