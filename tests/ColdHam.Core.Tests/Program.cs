@@ -11,7 +11,22 @@ var tests = new (string Name, Func<Task> Run)[]
     ("evaluates overnight schedules", EvaluateOvernightSchedule),
     ("replaces only managed hosts section", TransformHostsFile),
     ("rejects hosts-file rule injection", RejectHostsInjection),
-    ("round-trips configuration", RoundTripConfiguration)
+    ("round-trips configuration", RoundTripConfiguration),
+    ("preserves hosts content exactly", ReliabilityTests.ExactHostsContent),
+    ("rejects ambiguous hosts markers", ReliabilityTests.InvalidMarkers),
+    ("preserves hosts bytes and encoding", ReliabilityTests.HostsBytes),
+    ("leaves locked hosts unchanged and retries", ReliabilityTests.LockedHosts),
+    ("does not rewrite a read-only unmanaged hosts file", ReliabilityTests.ReadOnlyHosts),
+    ("recovers corrupted settings from backup without activation", ReliabilityTests.RecoverSettings),
+    ("preserves invalid settings without a usable backup", ReliabilityTests.InvalidSettings),
+    ("serializes concurrent configuration saves", ReliabilityTests.ConcurrentSaves),
+    ("requires consent for every new session and rule set", ReliabilityTests.Consent),
+    ("rejects unsafe executable rules", ReliabilityTests.UnsafeExecutables),
+    ("evaluates exact schedule boundaries", ReliabilityTests.ScheduleBoundaries),
+    ("evaluates timed and unlimited sessions", ReliabilityTests.ManualSessions),
+    ("keeps schedule and session independent", ReliabilityTests.SessionScheduleOverlap),
+    ("migrates legacy manual state safely", ReliabilityTests.LegacySessionMigration),
+    ("preserves future configuration versions", ReliabilityTests.FutureConfigurationVersion)
 };
 
 var failed = 0;
@@ -67,7 +82,7 @@ static Task EvaluateDaytimeSchedule()
         Start = new TimeOnly(9, 0),
         End = new TimeOnly(17, 0)
     };
-    var monday = new DateTimeOffset(2026, 8, 31, 10, 0, 0, TimeSpan.Zero).ToLocalTime();
+    var monday = new DateTimeOffset(new DateTime(2026, 8, 31, 10, 0, 0, DateTimeKind.Local));
     Assert(ScheduleEvaluator.IsActive(schedule, monday), "Monday at 10:00 should be active.");
     Assert(!ScheduleEvaluator.IsActive(schedule, monday.AddHours(8)), "Monday at 18:00 should be inactive.");
     return Task.CompletedTask;
@@ -132,12 +147,12 @@ static async Task RoundTripConfiguration()
         {
             Websites = ["example.com"],
             Applications = ["game.exe"],
-            ManualBlockEnabled = true
+            ManualSession = new ManualSession { StartedAtUtc = DateTimeOffset.UtcNow }
         });
         var loaded = await store.LoadAsync();
         Equal("example.com", loaded.Websites.Single());
         Equal("game.exe", loaded.Applications.Single());
-        Assert(loaded.ManualBlockEnabled, "Manual state should persist.");
+        Assert(loaded.ManualSession is not null, "Manual session should persist.");
     }
     finally
     {

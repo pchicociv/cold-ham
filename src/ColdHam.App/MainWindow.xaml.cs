@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Security.Principal;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -12,6 +11,11 @@ using System.Windows.Threading;
 using ColdHam.Core;
 using ColdHam.Windows;
 using Microsoft.Win32;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Color = System.Windows.Media.Color;
 
 namespace ColdHam.App;
 
@@ -25,11 +29,30 @@ public partial class MainWindow : Window
     private readonly HostsFileManager _hosts = new();
     private readonly ProcessBlocker _processBlocker = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(2) };
+    private readonly TimeProvider _clock = TimeProvider.System;
     private BlockConfiguration _configuration = new();
     private bool _effectiveActive;
     private bool _loading = true;
     private bool _allowClose;
     private string? _lastError;
+    private string? _hostsError;
+    private string? _applicationError;
+    private string? _configurationError;
+    private string? _recoveryMessage;
+    private string? _appliedWebRules;
+    private string? _attemptedWebRules;
+    private readonly ApplicationBlockConsent _consent = new();
+    private bool _applicationsApproved;
+    private bool _applying;
+    private bool _loadFailed;
+    private bool _saving;
+    private bool _suppressEnforcementForExit;
+    private bool _hideExplanationShown;
+
+    public event EventHandler? BlockStateChanged;
+    public event EventHandler<TrayNotificationEventArgs>? NotificationRaised;
+
+    public string TrayStatus { get; private set; } = "Cold Ham";
 
     public MainWindow()
     {
@@ -45,6 +68,12 @@ public partial class MainWindow : Window
         try
         {
             _configuration = await _store.LoadAsync();
+            _loadFailed = false;
+            _configurationError = null;
+            _websites.Clear();
+            _applications.Clear();
+            _recoveryMessage = _store.RecoveryMessage;
+            if (_recoveryMessage is not null) AddActivity(_recoveryMessage);
             foreach (var website in _configuration.Websites)
             {
                 _websites.Add(RuleRow.ForWebsite(website));
@@ -64,6 +93,8 @@ public partial class MainWindow : Window
         catch (Exception exception)
         {
             _loading = false;
+            _configurationError = "No se pudo cargar la configuración. Revisa el archivo y reinicia Cold Ham. " + exception.Message;
+            _loadFailed = true;
             ShowError("No se pudo cargar la configuración.", exception);
         }
 
@@ -72,46 +103,73 @@ public partial class MainWindow : Window
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_applications.Count > 0)
+        _configuration.ManualSession = BlockStateEvaluator.CreateUnlimitedSession(_clock);
+        await StartSessionAsync("Sesión sin límite iniciada.");
+    }
+
+    private async void Start25Button_Click(object sender, RoutedEventArgs e) => await StartTimedSessionAsync(25);
+
+    private async void Start50Button_Click(object sender, RoutedEventArgs e) => await StartTimedSessionAsync(50);
+
+    private async void StartCustomButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(SessionMinutesInput.Text, NumberStyles.None, CultureInfo.InvariantCulture, out var minutes))
         {
-            var result = MessageBox.Show(
-                "El bloqueo cerrará las aplicaciones coincidentes y podría descartar cambios sin guardar. ¿Quieres continuar?",
-                "Iniciar bloqueo",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes)
-            {
-                return;
-            }
+            MessageBox.Show("Introduce una duración en minutos entre 1 y 1440.", "Duración no válida", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
         }
 
-        _configuration.ManualBlockEnabled = true;
-        await SaveAsync();
+        await StartTimedSessionAsync(minutes);
+    }
+
+    private async Task StartTimedSessionAsync(int minutes)
+    {
+        if (!BlockStateEvaluator.TryCreateTimedSession(_clock, minutes, out var session, out var error))
+        {
+            MessageBox.Show(error, "Duración no válida", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        _configuration.ManualSession = session;
+        await StartSessionAsync($"Sesión de {minutes} minutos iniciada.");
+    }
+
+    private async Task StartSessionAsync(string activity)
+    {
+        if (!await SaveAsync()) return;
+        AddActivity(activity);
         await ApplyDesiredStateAsync(forceHosts: true);
     }
 
-    private async void StopButton_Click(object sender, RoutedEventArgs e)
+    private async void EndSessionButton_Click(object sender, RoutedEventArgs e) => await EndSessionAsync(confirm: true);
+
+    private async Task EndSessionAsync(bool confirm)
     {
-        var result = MessageBox.Show(
-            "Se detendrá el bloqueo manual y se desactivará el horario. ¿Quieres continuar?",
-            "Detener todo",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-        if (result != MessageBoxResult.Yes)
+        if (_configuration.ManualSession is null) return;
+        var state = GetState();
+        if (confirm && MessageBox.Show(this,
+                state.ScheduledActive
+                    ? "La sesión terminará, pero el bloqueo continuará porque el horario está activo. ¿Continuar?"
+                    : "La sesión terminará y se retirarán las reglas si el horario no está activo. ¿Continuar?",
+                "Terminar sesión", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             return;
         }
 
-        _configuration.ManualBlockEnabled = false;
-        _configuration.Schedule.Enabled = false;
-        ScheduleEnabled.IsChecked = false;
+        _configuration.ManualSession = null;
+        _consent.Reset();
         await SaveAsync();
-        await ApplyDesiredStateAsync(forceHosts: true);
+        AddActivity("Sesión manual terminada.");
+        await ApplyDesiredStateAsync(forceHosts: true, stopping: !state.ScheduledActive);
     }
+
+    private async void StopButton_Click(object sender, RoutedEventArgs e) => await StopAllAsync(confirm: true);
 
     private async void ElevateButton_Click(object sender, RoutedEventArgs e)
     {
-        await SaveAsync();
+        if (!await SaveAsync()) return;
+        var app = (App)Application.Current;
+        app.ReleaseInstanceForElevation();
         try
         {
             Process.Start(new ProcessStartInfo
@@ -121,14 +179,19 @@ public partial class MainWindow : Window
                 Verb = "runas"
             });
             _allowClose = true;
-            Application.Current.Shutdown();
+            app.ExitApplication();
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
+            if (!app.ReacquireInstanceAfterElevationCancellation())
+            {
+                _configurationError = "No se pudo recuperar la instancia de Cold Ham después de cancelar la elevación.";
+            }
             AddActivity("Se canceló el reinicio como administrador.");
         }
         catch (Exception exception)
         {
+            app.ReacquireInstanceAfterElevationCancellation();
             ShowError("No se pudo reiniciar como administrador.", exception);
         }
     }
@@ -277,7 +340,7 @@ public partial class MainWindow : Window
 
     private async Task SaveScheduleFromControlsAsync()
     {
-        if (_loading)
+        if (_loading || _saving || _applying)
         {
             return;
         }
@@ -291,7 +354,7 @@ public partial class MainWindow : Window
 
         ScheduleValidationText.Text = string.Empty;
         _configuration.Schedule = schedule;
-        await SaveAsync();
+        if (!await SaveAsync()) return;
         await ApplyDesiredStateAsync(forceHosts: true);
     }
 
@@ -311,87 +374,136 @@ public partial class MainWindow : Window
     private async Task RulesChangedAsync()
     {
         CopyRulesToConfiguration();
-        await SaveAsync();
+        if (!await SaveAsync()) return;
         await ApplyDesiredStateAsync(forceHosts: _effectiveActive);
     }
 
-    private async Task ApplyDesiredStateAsync(bool forceHosts = false)
+    private async void RetryButton_Click(object sender, RoutedEventArgs e)
     {
-        var scheduled = ScheduleEvaluator.IsActive(_configuration.Schedule, DateTimeOffset.Now);
-        var desired = _configuration.ManualBlockEnabled || scheduled;
-        var stateChanged = desired != _effectiveActive;
-
-        if (desired && (stateChanged || forceHosts))
+        if (_loadFailed)
         {
-            try
+            Window_Loaded(sender, e);
+            return;
+        }
+        if (!await SaveAsync()) return;
+        _recoveryMessage = null;
+        _consent.Reset();
+        await ApplyDesiredStateAsync(forceHosts: true);
+    }
+
+    private static string RuleKey(IEnumerable<string> rules) =>
+        string.Join("\n", rules.Order(StringComparer.OrdinalIgnoreCase)).ToLowerInvariant();
+
+    private async Task ApplyDesiredStateAsync(bool forceHosts = false, bool stopping = false)
+    {
+        if (_applying || _saving || _loading || (_configurationError is not null && !stopping)) return;
+        _applying = true;
+        MainTabs.IsEnabled = false;
+        StartButton.IsEnabled = false;
+        StopButton.IsEnabled = false;
+        AdminBanner.IsEnabled = false;
+        try
+        {
+            var state = GetState();
+            if (state.SessionExpired)
             {
-                if (_configuration.Websites.Count > 0)
+                _configuration.ManualSession = null;
+                _consent.Reset();
+                await SaveExpiredSessionAsync();
+                AddActivity("La sesión manual terminó por tiempo.");
+                RaiseNotification("Sesión terminada", state.ScheduledActive
+                    ? "La sesión ha terminado."
+                    : "La sesión ha terminado; el horario puede mantener el bloqueo activo.");
+                state = GetState();
+            }
+
+            var scheduled = state.ScheduledActive;
+            var desired = !_suppressEnforcementForExit && state.DesiredActive;
+            var stateChanged = desired != _effectiveActive;
+            var webRules = desired ? _configuration.Websites.ToArray() : [];
+            var webKey = RuleKey(webRules);
+            if (forceHosts || _attemptedWebRules != webKey)
+            {
+                _attemptedWebRules = webKey;
+                try
                 {
-                    await _hosts.ApplyAsync(_configuration.Websites);
-                    AddActivity($"Se aplicaron {_configuration.Websites.Count} regla(s) web.");
+                    if (webRules.Length > 0) await _hosts.ApplyAsync(webRules);
+                    else await _hosts.RemoveAsync();
+                    _appliedWebRules = webKey;
+                    _hostsError = null;
+                    AddActivity(webRules.Length > 0
+                        ? $"Se escribieron {webRules.Length} regla(s) web en hosts."
+                        : "Se verificó la retirada de las reglas web de Cold Ham.");
                 }
-                else
+                catch (Exception exception)
                 {
-                    await _hosts.RemoveAsync();
+                    _hostsError = exception is UnauthorizedAccessException
+                        ? "No se pudieron aplicar o retirar las reglas web. Reinicia como administrador y pulsa Reintentar."
+                        : $"No se pudieron aplicar o retirar las reglas web: {exception.Message}";
+                    ReportOnce(_hostsError);
                 }
-
-                _lastError = null;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                ReportOnce("Las reglas web necesitan permisos de administrador.");
-            }
-            catch (Exception exception)
-            {
-                ReportOnce($"No se pudieron aplicar las reglas web: {exception.Message}");
             }
 
-            if (stateChanged)
+            _effectiveActive = desired;
+            if (stateChanged) AddActivity(desired ? "Se solicitó activar el bloqueo." : "Se solicitó detener el bloqueo.");
+            _applicationError = null;
+            var consentStatus = _consent.Evaluate(desired, _configuration.Applications);
+            if (!desired || _configuration.Applications.Count == 0)
             {
-                AddActivity(scheduled && !_configuration.ManualBlockEnabled
-                    ? "Comenzó el bloqueo programado."
-                    : "Comenzó el bloqueo manual.");
+                _applicationsApproved = false;
+            }
+            else if (_configuration.Applications.Count > 0)
+            {
+                var applications = _configuration.Applications.ToArray();
+                _applicationsApproved = consentStatus == ApplicationConsentStatus.Approved;
+                if (consentStatus == ApplicationConsentStatus.NeedsConfirmation)
+                {
+                    _applicationsApproved = MessageBox.Show(this,
+                        "Se cerrarán las aplicaciones que coincidan con estas reglas, incluidas las que abras durante este bloqueo:\n\n"
+                        + string.Join("\n", applications)
+                        + "\n\nGuarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, las webs seguirán su estado indicado y las aplicaciones quedarán pendientes.",
+                        "Confirmar bloqueo de aplicaciones", MessageBoxButton.YesNo, MessageBoxImage.Warning,
+                        MessageBoxResult.No) == MessageBoxResult.Yes;
+                    _consent.Decide(applications, _applicationsApproved);
+                    if (!_applicationsApproved)
+                    {
+                        RaiseNotification("Cierres pendientes", "Cold Ham no cerrará aplicaciones hasta que autorices la sesión.");
+                    }
+                }
+                // A scheduled session can end while the confirmation dialog is open.
+                if (!GetState().DesiredActive)
+                {
+                    _consent.Reset();
+                    _applicationsApproved = false;
+                    return;
+                }
+                if (_applicationsApproved)
+                {
+                    try
+                    {
+                        var sweep = await Task.Run(() => _processBlocker.Sweep(applications));
+                        if (sweep.Terminated > 0) AddActivity($"Se cerraron {sweep.Terminated} aplicación(es) bloqueada(s).");
+                        if (sweep.Errors.Count > 0)
+                        {
+                            _applicationError = string.Join("\n", sweep.Errors.Distinct());
+                            ReportOnce(_applicationError);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        _applicationError = $"No se pudo comprobar el bloqueo de aplicaciones: {exception.Message}";
+                        ReportOnce(_applicationError);
+                    }
+                }
             }
         }
-        else if (!desired && (stateChanged || forceHosts))
+        finally
         {
-            try
-            {
-                await _hosts.RemoveAsync();
-                AddActivity("Se retiraron las reglas web.");
-                _lastError = null;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                ReportOnce("Se necesitan permisos de administrador para retirar las reglas web.");
-            }
-            catch (Exception exception)
-            {
-                ReportOnce($"No se pudieron retirar las reglas web: {exception.Message}");
-            }
-
-            if (stateChanged)
-            {
-                AddActivity("El bloqueo se detuvo.");
-            }
+            _applying = false;
+            MainTabs.IsEnabled = true;
+            AdminBanner.IsEnabled = true;
+            UpdateStatus();
         }
-
-        _effectiveActive = desired;
-        if (desired && _configuration.Applications.Count > 0)
-        {
-            var sweep = _processBlocker.Sweep(_configuration.Applications);
-            if (sweep.Terminated > 0)
-            {
-                AddActivity($"Se cerraron {sweep.Terminated} aplicación(es) bloqueada(s).");
-            }
-
-            foreach (var error in sweep.Errors)
-            {
-                ReportOnce(error);
-            }
-        }
-
-        UpdateStatus();
     }
 
     private void PopulateSchedule(WeeklySchedule schedule)
@@ -459,38 +571,78 @@ public partial class MainWindow : Window
         _configuration.Applications = _applications.Select(item => item.Value).ToList();
     }
 
-    private async Task SaveAsync()
+    private BlockState GetState() => BlockStateEvaluator.Evaluate(_configuration, _clock);
+
+    private async Task SaveExpiredSessionAsync()
     {
-        CopyRulesToConfiguration();
-        await _store.SaveAsync(_configuration);
+        try
+        {
+            CopyRulesToConfiguration();
+            await _store.SaveAsync(_configuration);
+            _configurationError = null;
+        }
+        catch (Exception exception)
+        {
+            _configurationError = $"La sesión ha terminado, pero no se pudo guardar su finalización: {exception.Message}";
+            ReportOnce(_configurationError);
+        }
+    }
+
+    private async Task<bool> SaveAsync()
+    {
+        if (_loadFailed || _saving) return false;
+        _saving = true;
         UpdateStatus();
+        CopyRulesToConfiguration();
+        try
+        {
+            await _store.SaveAsync(_configuration);
+            _configurationError = null;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            _configurationError = $"No se pudo guardar la configuración. Pulsa Reintentar tras resolver el problema: {exception.Message}";
+            ReportOnce(_configurationError);
+            return false;
+        }
+        finally { _saving = false; UpdateStatus(); }
     }
 
     private void UpdateStatus()
     {
-        var scheduled = ScheduleEvaluator.IsActive(_configuration.Schedule, DateTimeOffset.Now);
-        var elevated = IsAdministrator();
+        var state = GetState();
+        var scheduled = state.ScheduledActive;
+        var pendingConsent = _effectiveActive && _applications.Count > 0 && !_applicationsApproved;
+        var hasError = _hostsError is not null || _applicationError is not null || _configurationError is not null;
 
-        StatusDot.Fill = new SolidColorBrush(_effectiveActive
+        StatusDot.Fill = new SolidColorBrush(hasError || pendingConsent ? Color.FromRgb(181, 71, 8) : _effectiveActive
             ? Color.FromRgb(18, 183, 106)
             : Color.FromRgb(152, 162, 179));
-        StatusTitleText.Text = _effectiveActive ? "Bloqueo activo" : "Bloqueo detenido";
-        StatusText.Text = _effectiveActive
-            ? scheduled && !_configuration.ManualBlockEnabled
+        StatusTitleText.Text = hasError ? "Bloqueo con incidencias" : pendingConsent ? "Bloqueo pendiente de confirmación"
+            : _effectiveActive ? "Bloqueo activo" : "Bloqueo detenido";
+        StatusText.Text = hasError ? "Revisa el estado de webs y aplicaciones antes de dar el bloqueo por aplicado o retirado." : _effectiveActive
+            ? scheduled && !state.ManualActive
                 ? "Activado por el horario semanal"
-                : "Activado manualmente"
+                : scheduled ? "Activado por una sesión y el horario semanal" : "Activado por una sesión manual"
             : "Las reglas están preparadas pero no se están aplicando";
 
-        var transition = FindNextScheduleTransition(_configuration.Schedule, DateTime.Now);
-        if (_configuration.ManualBlockEnabled)
+        var transition = state.NextScheduleTransition;
+        if (state.ManualActive && _configuration.ManualSession?.EndsAtUtc is { } endsAt)
         {
-            NextChangeText.Text = "El bloqueo manual no tiene hora de finalización.";
+            var remaining = state.Remaining ?? TimeSpan.Zero;
+            var scheduleContinuation = scheduled ? " El horario también está activo." : string.Empty;
+            NextChangeText.Text = $"La sesión termina {FormatRemaining(remaining)} ({FormatTransition(endsAt.LocalDateTime)}).{scheduleContinuation}";
+        }
+        else if (state.ManualActive)
+        {
+            NextChangeText.Text = "La sesión manual no tiene hora de finalización.";
         }
         else if (transition is not null)
         {
             NextChangeText.Text = scheduled
-                ? $"Finaliza {FormatTransition(transition.Value)}."
-                : $"Próximo bloqueo {FormatTransition(transition.Value)}.";
+                ? $"Finaliza {FormatTransition(transition.Value.LocalDateTime)}."
+                : $"Próximo bloqueo {FormatTransition(transition.Value.LocalDateTime)}.";
         }
         else
         {
@@ -499,11 +651,26 @@ public partial class MainWindow : Window
                 : "No hay ningún horario activo.";
         }
 
-        StartButton.IsEnabled = !_configuration.ManualBlockEnabled;
-        StopButton.IsEnabled = _configuration.ManualBlockEnabled || _configuration.Schedule.Enabled || _effectiveActive;
-        AdminBanner.Visibility = _effectiveActive && _websites.Count > 0 && !elevated
+        StartButton.IsEnabled = !_applying && !_saving && !_loadFailed && !state.ManualActive;
+        Start25Button.IsEnabled = StartButton.IsEnabled;
+        Start50Button.IsEnabled = StartButton.IsEnabled;
+        StartCustomButton.IsEnabled = StartButton.IsEnabled;
+        SessionMinutesInput.IsEnabled = StartButton.IsEnabled;
+        EndSessionButton.IsEnabled = !_applying && !_saving && state.ManualActive;
+        StopButton.IsEnabled = !_applying && !_saving && (state.ManualActive || _configuration.Schedule.Enabled || _effectiveActive || _hostsError is not null || _loadFailed);
+        MainTabs.IsEnabled = !_applying && !_saving && !_loadFailed;
+        AdminBanner.IsEnabled = !_applying && !_saving;
+        RecoveryText.Text = string.Join("\n", new[] { _configurationError, _hostsError, _applicationError, _recoveryMessage,
+            pendingConsent ? "Cierres de aplicaciones sin autorizar. Pulsa Reintentar cuando hayas guardado tu trabajo." : null }
+            .Where(message => message is not null));
+        AdminBanner.Visibility = RecoveryText.Text.Length > 0
             ? Visibility.Visible
             : Visibility.Collapsed;
+        EnforcementText.Text = "Webs: " + (_hostsError is not null ? "estado sin confirmar; pueden quedar reglas activas"
+            : _appliedWebRules is null ? "sin comprobar" : _appliedWebRules.Length > 0 ? "reglas escritas en hosts" : "sin reglas activas")
+            + " · Aplicaciones: " + (_configurationError is not null ? "vigilancia suspendida"
+                : _applicationError is not null ? "error de comprobación"
+                : pendingConsent ? "pendientes de autorización" : _effectiveActive && _applicationsApproved && _applications.Count > 0 ? "vigilando" : "sin vigilancia");
 
         var websiteLabel = _websites.Count == 1 ? "1 sitio web" : $"{_websites.Count} sitios web";
         var applicationLabel = _applications.Count == 1 ? "1 aplicación" : $"{_applications.Count} aplicaciones";
@@ -513,21 +680,34 @@ public partial class MainWindow : Window
         WebsiteEmptyText.Visibility = _websites.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ApplicationEmptyText.Visibility = _applications.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        UpdateRuleStatuses(elevated);
+        UpdateRuleStatuses();
         UpdateScheduleSummary();
+        SessionSummaryText.Text = state.ManualActive
+            ? _configuration.ManualSession?.EndsAtUtc is { } end
+                ? $"Sesión en curso: {FormatRemaining(state.Remaining ?? TimeSpan.Zero)} restantes; termina {FormatTransition(end.LocalDateTime)}."
+                : "Sesión manual en curso sin hora de finalización."
+            : scheduled
+                ? "No hay sesión manual; el horario mantiene el bloqueo activo."
+                : "No hay una sesión manual en curso.";
+        TrayStatus = StatusTitleText.Text + " · " + NextChangeText.Text;
+        BlockStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void UpdateRuleStatuses(bool elevated)
+    private void UpdateRuleStatuses()
     {
         foreach (var website in _websites)
         {
-            if (!_effectiveActive)
+            if (_hostsError is not null)
+            {
+                website.SetStatus("Sin confirmar", "#B54708");
+            }
+            else if (!_effectiveActive)
             {
                 website.SetStatus("Preparado", "#667085");
             }
-            else if (elevated)
+            else if (_appliedWebRules == RuleKey(_configuration.Websites))
             {
-                website.SetStatus("Aplicado", "#067647");
+                website.SetStatus("En hosts", "#067647");
             }
             else
             {
@@ -537,7 +717,9 @@ public partial class MainWindow : Window
 
         foreach (var application in _applications)
         {
-            application.SetStatus(_effectiveActive ? "Vigilando" : "Preparado", _effectiveActive ? "#067647" : "#667085");
+            var status = _configurationError is not null ? "Sin vigilancia" : !_effectiveActive ? "Preparado" : !_applicationsApproved ? "Sin autorizar"
+                : _applicationError is not null ? "Revisar" : "Vigilando";
+            application.SetStatus(status, status == "Vigilando" ? "#067647" : "#667085");
         }
     }
 
@@ -590,42 +772,6 @@ public partial class MainWindow : Window
 
     private static int DayOrder(DayOfWeek day) => day == DayOfWeek.Sunday ? 7 : (int)day;
 
-    private static DateTime? FindNextScheduleTransition(WeeklySchedule schedule, DateTime now)
-    {
-        if (!schedule.Enabled || schedule.Days.Count == 0)
-        {
-            return null;
-        }
-
-        var currentState = ScheduleEvaluator.IsActive(schedule, new DateTimeOffset(now));
-        var boundaries = new List<DateTime>();
-        for (var offset = -1; offset <= 8; offset++)
-        {
-            var date = now.Date.AddDays(offset);
-            if (!schedule.Days.Contains(date.DayOfWeek))
-            {
-                continue;
-            }
-
-            var start = date.Add(schedule.Start.ToTimeSpan());
-            var endDate = schedule.End <= schedule.Start ? date.AddDays(1) : date;
-            var end = endDate.Add(schedule.End.ToTimeSpan());
-            boundaries.Add(start);
-            boundaries.Add(end);
-        }
-
-        foreach (var boundary in boundaries.Where(value => value > now).Distinct().Order())
-        {
-            var stateAfterBoundary = ScheduleEvaluator.IsActive(schedule, new DateTimeOffset(boundary.AddSeconds(1)));
-            if (stateAfterBoundary != currentState)
-            {
-                return boundary;
-            }
-        }
-
-        return null;
-    }
-
     private static string FormatTransition(DateTime transition)
     {
         if (transition.Date == DateTime.Today)
@@ -639,6 +785,14 @@ public partial class MainWindow : Window
         }
 
         return $"el {transition.ToString("dddd", SpanishCulture)} a las {transition:HH:mm}";
+    }
+
+    private static string FormatRemaining(TimeSpan remaining)
+    {
+        var rounded = TimeSpan.FromSeconds(Math.Ceiling(Math.Max(0, remaining.TotalSeconds)));
+        return rounded.TotalHours >= 1
+            ? $"en {(int)rounded.TotalHours}:{rounded.Minutes:D2}:{rounded.Seconds:D2}"
+            : $"en {rounded.Minutes:D2}:{rounded.Seconds:D2}";
     }
 
     private void AddActivity(string message)
@@ -658,19 +812,17 @@ public partial class MainWindow : Window
         {
             _lastError = message;
             AddActivity(message);
+            RaiseNotification("Cold Ham necesita revisión", message);
         }
     }
+
+    private void RaiseNotification(string title, string message) =>
+        NotificationRaised?.Invoke(this, new TrayNotificationEventArgs(title, message));
 
     private void ShowError(string heading, Exception exception)
     {
         AddActivity($"{heading} {exception.Message}");
         MessageBox.Show($"{heading}\n\n{exception.Message}", "Cold Ham", MessageBoxButton.OK, MessageBoxImage.Error);
-    }
-
-    private static bool IsAdministrator()
-    {
-        using var identity = WindowsIdentity.GetCurrent();
-        return new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
     }
 
     private static string TranslateValidation(string message)
@@ -679,7 +831,6 @@ public partial class MainWindow : Window
         {
             return "Los comodines no son compatibles con el bloqueo mediante el archivo hosts.";
         }
-
         if (message.Contains("protected", StringComparison.OrdinalIgnoreCase))
         {
             return "Ese proceso pertenece al sistema o a Cold Ham y no puede bloquearse.";
@@ -693,31 +844,108 @@ public partial class MainWindow : Window
         return "El valor introducido no es válido.";
     }
 
-    private async void Window_Closing(object? sender, CancelEventArgs e)
+    public void ShowFromTray()
     {
-        if (_allowClose || !_effectiveActive)
+        if (!IsVisible) Show();
+        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        Activate();
+        Topmost = true;
+        Topmost = false;
+        Focus();
+    }
+
+    public async Task EndSessionFromTrayAsync() => await EndSessionAsync(confirm: true);
+
+    public async Task StopAllFromTrayAsync() => await StopAllAsync(confirm: true);
+
+    public async Task RequestExitFromTrayAsync()
+    {
+        if (_applying || _saving) return;
+        var state = GetState();
+        if (MessageBox.Show(this,
+                state.DesiredActive || _hostsError is not null
+                    ? "Al salir se terminará la sesión y se retirarán las reglas web. El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?"
+                    : "El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?",
+                "Salir de Cold Ham", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        _configuration.ManualSession = null;
+        var saved = await SaveAsync();
+        _suppressEnforcementForExit = true;
+        _timer.Stop();
+        await ApplyDesiredStateAsync(forceHosts: true, stopping: true);
+        if (_hostsError is not null)
+        {
+            _suppressEnforcementForExit = false;
+            _timer.Start();
+            await ApplyDesiredStateAsync(forceHosts: true);
+            ShowFromTray();
+            return;
+        }
+
+        if (!saved && MessageBox.Show(this,
+            "Las reglas se han retirado, pero no se pudo guardar el fin de la sesión. ¿Salir de todos modos?",
+            "Configuración sin guardar", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        {
+            _suppressEnforcementForExit = false;
+            _timer.Start();
+            return;
+        }
+
+        _allowClose = true;
+        ((App)Application.Current).ExitApplication();
+    }
+
+    private async Task StopAllAsync(bool confirm)
+    {
+        if (confirm && MessageBox.Show(this,
+            "Se terminará la sesión y se desactivará el horario. ¿Quieres continuar?",
+            "Detener todo", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        _configuration.ManualSession = null;
+        _configuration.Schedule.Enabled = false;
+        ScheduleEnabled.IsChecked = false;
+        _consent.Reset();
+        await SaveAsync();
+        AddActivity("Se detuvo la sesión y se desactivó el horario.");
+        await ApplyDesiredStateAsync(forceHosts: true, stopping: true);
+    }
+
+    private void Window_Closing(object? sender, CancelEventArgs e)
+    {
+        if (_allowClose)
         {
             return;
         }
 
         e.Cancel = true;
-        var result = MessageBox.Show(
-            "El bloqueo de aplicaciones solo funciona mientras Cold Ham está abierto. ¿Quieres detener todo y salir?",
-            "Salir de Cold Ham",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-        if (result != MessageBoxResult.Yes)
+        if (!((App)Application.Current).TrayAvailable)
         {
+            _ = RequestExitFromTrayAsync();
             return;
         }
-
-        _configuration.ManualBlockEnabled = false;
-        _configuration.Schedule.Enabled = false;
-        await SaveAsync();
-        await ApplyDesiredStateAsync(forceHosts: true);
-        _allowClose = true;
-        Close();
+        if (!_hideExplanationShown)
+        {
+            _hideExplanationShown = true;
+            MessageBox.Show(this,
+                "Cold Ham seguirá funcionando desde el icono de la bandeja. Ábrelo desde allí para terminar una sesión o salir.",
+                "Cold Ham sigue activo", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        Hide();
+        AddActivity("La ventana se ocultó en la bandeja del sistema.");
     }
+
+}
+
+public sealed class TrayNotificationEventArgs(string title, string message) : EventArgs
+{
+    public string Title { get; } = title;
+    public string Message { get; } = message;
 }
 
 public sealed class RuleRow : INotifyPropertyChanged

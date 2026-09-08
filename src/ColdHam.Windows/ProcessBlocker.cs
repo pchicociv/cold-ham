@@ -30,24 +30,28 @@ public sealed class ProcessBlocker
         {
             using (process)
             {
-                if (process.Id == Environment.ProcessId || !Matches(process, rules))
-                {
-                    continue;
-                }
-
-                matched++;
                 try
                 {
+                    if (process.Id == Environment.ProcessId || !Matches(process, rules)) continue;
+                    matched++;
                     if (!process.HasExited)
                     {
+                        var executablePath = process.MainModule?.FileName;
+                        var windowsPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar;
+                        if (executablePath is null || executablePath.StartsWith(windowsPath, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(executablePath, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            errors.Add($"Proceso protegido o ruta no verificable: PID {process.Id}.");
+                            continue;
+                        }
                         process.Kill(false);
-                        process.WaitForExit(1500);
-                        terminated++;
+                        if (process.WaitForExit(1500)) terminated++;
+                        else errors.Add($"No se confirmó el cierre del proceso {process.Id}.");
                     }
                 }
                 catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
                 {
-                    errors.Add($"Could not stop {process.ProcessName}: {exception.Message}");
+                    errors.Add($"No se pudo comprobar o cerrar el proceso {process.Id}: {exception.Message}");
                 }
             }
         }
@@ -79,7 +83,7 @@ public sealed class ProcessBlocker
             }
             catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
             {
-                // Access to another process path can be denied; a full-path rule then does not match.
+                throw new InvalidOperationException($"No se pudo verificar la ruta para la regla {rule.Value}.", exception);
             }
         }
 

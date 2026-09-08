@@ -20,7 +20,7 @@ public static partial class RuleNormalizer
         error = string.Empty;
         var value = input?.Trim() ?? string.Empty;
 
-        if (value.Length == 0)
+        if (value.Length == 0 || value.Any(char.IsControl))
         {
             error = "Enter a domain, for example reddit.com.";
             return false;
@@ -76,6 +76,12 @@ public static partial class RuleNormalizer
         error = string.Empty;
         var value = (input ?? string.Empty).Trim().Trim('"');
 
+        if (value.IndexOfAny(['*', '?', '<', '>', '|']) >= 0 || value.Any(char.IsControl))
+        {
+            error = "The executable path is not valid.";
+            return false;
+        }
+
         if (value.Length == 0)
         {
             error = "Enter an executable name or choose an .exe file.";
@@ -119,4 +125,3 @@ public static partial class RuleNormalizer
     [GeneratedRegex(@"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")]
     private static partial Regex DomainRegex();
 }
-

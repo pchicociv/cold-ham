@@ -23,11 +23,17 @@
                         <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#98A2B3" Margin="0,0,9,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="StatusTitleText" Text="Cargando…" FontSize="20" FontWeight="SemiBold" />
                     </StackPanel>
-                    <TextBlock x:Name="StatusText" Margin="19,3,0,0" Foreground="{StaticResource MutedTextBrush}" />
-                    <TextBlock x:Name="NextChangeText" Margin="19,2,0,0" Foreground="{StaticResource MutedTextBrush}" />
+                    <TextBlock x:Name="StatusText" Margin="19,3,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="NextChangeText" Margin="19,2,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="EnforcementText" Margin="19,3,0,0" TextWrapping="Wrap" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="StartButton" Content="Iniciar bloqueo" Style="{StaticResource PrimaryButton}" Click="StartButton_Click" />
+                    <Button x:Name="Start25Button" Content="25 min" Style="{StaticResource PrimaryButton}" Click="Start25Button_Click" />
+                    <Button x:Name="Start50Button" Content="50 min" Style="{StaticResource PrimaryButton}" Click="Start50Button_Click" />
+                    <TextBox x:Name="SessionMinutesInput" Width="54" Margin="4,0" ToolTip="Minutos: entre 1 y 1440" />
+                    <Button x:Name="StartCustomButton" Content="Iniciar" Style="{StaticResource PrimaryButton}" Click="StartCustomButton_Click" />
+                    <Button x:Name="StartButton" Content="Sin límite" Click="StartButton_Click" />
+                    <Button x:Name="EndSessionButton" Content="Terminar sesión" Click="EndSessionButton_Click" />
                     <Button x:Name="StopButton" Content="Detener todo" Style="{StaticResource DangerButton}" Click="StopButton_Click" />
                 </StackPanel>
             </Grid>
@@ -41,11 +47,16 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Permisos necesarios" FontWeight="SemiBold" />
-                    <TextBlock Text="Las reglas web se aplicarán cuando Cold Ham se ejecute como administrador."
-                               Foreground="#7A5A10" Margin="0,2,16,0" TextWrapping="Wrap" />
+                    <TextBlock Text="Revisión necesaria" FontWeight="SemiBold" />
+                    <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="RecoveryText" Text=""
+                                   Foreground="#7A5A10" Margin="0,2,16,0" TextWrapping="Wrap" />
+                    </ScrollViewer>
                 </StackPanel>
-                <Button Grid.Column="1" Content="Reiniciar como administrador" Click="ElevateButton_Click" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Content="Reintentar" Click="RetryButton_Click" />
+                    <Button Content="Reiniciar como administrador" Click="ElevateButton_Click" />
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -60,6 +71,7 @@
                     <StackPanel>
                         <TextBlock Text="Configuración actual" FontSize="18" FontWeight="SemiBold" />
                         <TextBlock x:Name="SummaryText" FontSize="15" Margin="0,8,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Name="SessionSummaryText" Margin="0,7,0,0" FontWeight="SemiBold" TextWrapping="Wrap" />
                     </StackPanel>
                     <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,22,0,0" Padding="0,20,0,0">
                         <StackPanel>
