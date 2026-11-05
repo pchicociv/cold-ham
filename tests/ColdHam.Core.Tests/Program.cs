@@ -26,7 +26,21 @@ var tests = new (string Name, Func<Task> Run)[]
     ("evaluates timed and unlimited sessions", ReliabilityTests.ManualSessions),
     ("keeps schedule and session independent", ReliabilityTests.SessionScheduleOverlap),
     ("migrates legacy manual state safely", ReliabilityTests.LegacySessionMigration),
-    ("preserves future configuration versions", ReliabilityTests.FutureConfigurationVersion)
+    ("preserves future configuration versions", ReliabilityTests.FutureConfigurationVersion),
+    ("normalizes whitelist and gives exceptions priority", WhitelistTests.Priority),
+    ("limits exceptions to exact domains and www variants", WhitelistTests.ExactDomains),
+    ("rejects invalid whitelist rules", WhitelistTests.InvalidRules),
+    ("preserves unrelated hosts rules when allowing sites", WhitelistTests.HostsContent),
+    ("applies and reverses whitelist changes", WhitelistTests.ApplyChanges),
+    ("persists whitelist and migrates older configurations", WhitelistTests.Persistence),
+    ("recovers invalid whitelist without activation", WhitelistTests.InvalidConfiguration),
+    ("builds bounded exact-host browser allow policies", BrowserPolicyTests.Patterns),
+    ("applies deny-all and updates allowed sites reversibly", BrowserPolicyTests.Lifecycle),
+    ("refuses existing user and machine browser policies", BrowserPolicyTests.ExistingPolicies),
+    ("rolls back failed policy writes and retries cleanup", BrowserPolicyTests.Failures),
+    ("preserves externally changed browser policies", BrowserPolicyTests.ExternalChanges),
+    ("rejects corrupted policy recovery journals", BrowserPolicyTests.InvalidJournal),
+    ("persists and validates the website blocking mode", BrowserPolicyTests.ModePersistence)
 };
 
 var failed = 0;

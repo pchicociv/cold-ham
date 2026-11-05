@@ -20,9 +20,13 @@ public sealed class HostsFileManager
     public string HostsPath { get; }
 
     public Task ApplyAsync(IEnumerable<string> domains, CancellationToken cancellationToken = default)
+        => ApplyAsync(domains, [], cancellationToken);
+
+    public Task ApplyAsync(IEnumerable<string> domains, IEnumerable<string> allowedDomains, CancellationToken cancellationToken = default)
     {
         var rules = domains.ToArray();
-        return UpdateAsync(content => BuildContent(content, rules), cancellationToken);
+        var exceptions = allowedDomains.ToArray();
+        return UpdateAsync(content => BuildContent(content, rules, exceptions), cancellationToken);
     }
 
     public Task RemoveAsync(CancellationToken cancellationToken = default) => UpdateAsync(RemoveManagedSection, cancellationToken);
@@ -95,16 +99,15 @@ public sealed class HostsFileManager
     }
 
     public static string BuildContent(string existing, IEnumerable<string> domains)
+        => BuildContent(existing, domains, []);
+
+    public static string BuildContent(string existing, IEnumerable<string> domains, IEnumerable<string> allowedDomains)
     {
         var range = FindManagedSection(existing);
-        var normalized = domains.Select(domain => RuleNormalizer.TryNormalizeDomain(domain, out var value, out var error)
-            ? value : throw new InvalidDataException($"Regla web no válida: {error}")).ToArray();
+        var normalized = WebsiteRules.GetBlockedDomains(domains, allowedDomains);
         if (normalized.Length == 0) return RemoveManagedSection(existing);
         var newline = existing.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        var rules = normalized.SelectMany(domain => domain.StartsWith("www.", StringComparison.OrdinalIgnoreCase)
-                ? new[] { domain } : new[] { domain, $"www.{domain}" })
-            .Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase)
-            .SelectMany(domain => new[] { $"0.0.0.0 {domain}", $"::1 {domain}" });
+        var rules = normalized.SelectMany(domain => new[] { $"0.0.0.0 {domain}", $"::1 {domain}" });
         var section = string.Join(newline, new[] { BeginMarker }.Concat(rules).Concat(new[] { EndMarker }));
         if (range is { } owned)
         {

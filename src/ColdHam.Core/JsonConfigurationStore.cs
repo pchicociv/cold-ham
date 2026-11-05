@@ -108,16 +108,20 @@ public sealed class JsonConfigurationStore
 
     private static void Validate(BlockConfiguration configuration)
     {
-        if (configuration.Version != BlockConfiguration.CurrentVersion || configuration.Websites is null || configuration.Applications is null || configuration.Schedule?.Days is null
+        if (configuration.Version != BlockConfiguration.CurrentVersion || configuration.Websites is null || configuration.AllowedWebsites is null || configuration.Applications is null || configuration.Schedule?.Days is null
+            || !Enum.IsDefined(configuration.WebsiteMode)
             || configuration.Schedule.Days.Any(day => !Enum.IsDefined(day))
             || configuration.ManualSession is { Id.Length: 0 }
             || configuration.ManualSession is { StartedAtUtc: var sessionStart } && sessionStart == default
             || configuration.ManualSession is { StartedAtUtc: var started, EndsAtUtc: var ends } && ends is not null && ends <= started
             || configuration.Websites.Any(value => !RuleNormalizer.TryNormalizeDomain(value, out _, out _))
+            || configuration.AllowedWebsites.Any(value => !RuleNormalizer.TryNormalizeDomain(value, out _, out _))
             || configuration.Applications.Any(value => !RuleNormalizer.TryNormalizeApplication(value, out _, out _)))
         {
             throw new InvalidDataException("La configuración contiene reglas o un horario no válidos.");
         }
+        if (configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites)
+            BrowserPolicyPlan.BuildAllowlist(configuration.AllowedWebsites);
     }
 
     public async Task SaveAsync(BlockConfiguration configuration, CancellationToken cancellationToken = default)

@@ -23,10 +23,12 @@ public partial class MainWindow : Window
 {
     private static readonly CultureInfo SpanishCulture = CultureInfo.GetCultureInfo("es-ES");
     private readonly ObservableCollection<RuleRow> _websites = [];
+    private readonly ObservableCollection<RuleRow> _allowedWebsites = [];
     private readonly ObservableCollection<RuleRow> _applications = [];
     private readonly ObservableCollection<string> _activity = [];
     private readonly JsonConfigurationStore _store = new();
     private readonly HostsFileManager _hosts = new();
+    private readonly BrowserPolicyManager _browserPolicies = new();
     private readonly ProcessBlocker _processBlocker = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(2) };
     private readonly TimeProvider _clock = TimeProvider.System;
@@ -58,6 +60,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         WebsiteList.ItemsSource = _websites;
+        AllowedWebsiteList.ItemsSource = _allowedWebsites;
         ApplicationList.ItemsSource = _applications;
         ActivityList.ItemsSource = _activity;
         _timer.Tick += Timer_Tick;
@@ -71,6 +74,7 @@ public partial class MainWindow : Window
             _loadFailed = false;
             _configurationError = null;
             _websites.Clear();
+            _allowedWebsites.Clear();
             _applications.Clear();
             _recoveryMessage = _store.RecoveryMessage;
             if (_recoveryMessage is not null) AddActivity(_recoveryMessage);
@@ -84,7 +88,13 @@ public partial class MainWindow : Window
                 _applications.Add(RuleRow.ForApplication(application));
             }
 
+            foreach (var website in _configuration.AllowedWebsites)
+            {
+                _allowedWebsites.Add(RuleRow.ForWebsite(website));
+            }
+
             PopulateSchedule(_configuration.Schedule);
+            OnlyAllowedWebsitesToggle.IsChecked = _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites;
             _loading = false;
             AddActivity($"Configuración cargada desde {_store.FilePath}");
             await ApplyDesiredStateAsync(forceHosts: true);
@@ -250,6 +260,70 @@ public partial class MainWindow : Window
     }
 
     private async void AddApplicationButton_Click(object sender, RoutedEventArgs e) => await AddApplicationAsync();
+
+    private async void AddAllowedWebsiteButton_Click(object sender, RoutedEventArgs e) => await AddAllowedWebsiteAsync();
+
+    private async void AllowedWebsiteInput_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        await AddAllowedWebsiteAsync();
+    }
+
+    private async Task AddAllowedWebsiteAsync()
+    {
+        if (!RuleNormalizer.TryNormalizeDomain(AllowedWebsiteInput.Text, out var normalized, out var error))
+        {
+            MessageBox.Show(TranslateValidation(error), "Sitio web no válido", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (_allowedWebsites.Any(item => string.Equals(item.Value, normalized, StringComparison.OrdinalIgnoreCase)))
+        {
+            MessageBox.Show("Ese sitio web ya está en la lista de permitidos.", "Sitio duplicado", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try { BrowserPolicyPlan.BuildAllowlist(_allowedWebsites.Select(item => item.Value).Append(normalized)); }
+        catch (InvalidDataException exception)
+        {
+            MessageBox.Show(exception.Message, "Lista de permitidos completa", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        _allowedWebsites.Add(RuleRow.ForWebsite(normalized));
+        AllowedWebsiteInput.Clear();
+        await RulesChangedAsync();
+        AddActivity($"Sitio permitido añadido: {normalized}");
+    }
+
+    private async void WebsiteModeChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        var allowOnly = OnlyAllowedWebsitesToggle.IsChecked == true;
+        if (allowOnly && MessageBox.Show(this,
+                "Durante una sesión o un horario activo se bloquearán los sitios no permitidos en Chrome y Edge. Una lista vacía bloquea todos los sitios. Otros navegadores y los perfiles personales de Microsoft en Edge quedan fuera de este modo. Reinicia el navegador para cargar o retirar las políticas. ¿Activar este modo?",
+                "Solo sitios permitidos", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+        {
+            OnlyAllowedWebsitesToggle.IsChecked = false;
+            return;
+        }
+        _configuration.WebsiteMode = allowOnly ? WebsiteBlockingMode.AllowListedSites : WebsiteBlockingMode.BlockListedSites;
+        await RulesChangedAsync();
+        AddActivity(allowOnly ? "Modo web: solo sitios permitidos en Chrome y Edge." : "Modo web: lista de sitios bloqueados.");
+    }
+
+    private async void RemoveAllowedWebsiteItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: RuleRow selected }) return;
+        if (MessageBox.Show(this,
+                $"¿Eliminar {selected.Value} de los sitios permitidos? Dejará de estar permitido cuando esté activo el modo Solo sitios permitidos.",
+                "Eliminar sitio permitido", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+
+        _allowedWebsites.Remove(selected);
+        await RulesChangedAsync();
+        AddActivity($"Sitio permitido eliminado: {selected.Value}");
+    }
 
     private async void ApplicationInput_KeyDown(object sender, KeyEventArgs e)
     {
@@ -420,25 +494,39 @@ public partial class MainWindow : Window
             var scheduled = state.ScheduledActive;
             var desired = !_suppressEnforcementForExit && state.DesiredActive;
             var stateChanged = desired != _effectiveActive;
-            var webRules = desired ? _configuration.Websites.ToArray() : [];
-            var webKey = RuleKey(webRules);
+            var allowOnly = desired && _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites;
+            var webRules = desired && !allowOnly ? WebsiteRules.GetBlockedDomains(_configuration.Websites, []) : [];
+            var webKey = allowOnly ? "allow\n" + RuleKey(_configuration.AllowedWebsites) : RuleKey(webRules);
             if (forceHosts || _attemptedWebRules != webKey)
             {
                 _attemptedWebRules = webKey;
                 try
                 {
-                    if (webRules.Length > 0) await _hosts.ApplyAsync(webRules);
-                    else await _hosts.RemoveAsync();
+                    var failures = new List<Exception>();
+                    try
+                    {
+                        if (webRules.Length > 0) await _hosts.ApplyAsync(_configuration.Websites);
+                        else await _hosts.RemoveAsync();
+                    }
+                    catch (Exception exception) { failures.Add(exception); }
+                    try
+                    {
+                        if (allowOnly) await _browserPolicies.ApplyAsync(_configuration.AllowedWebsites);
+                        else await _browserPolicies.RemoveAsync();
+                    }
+                    catch (Exception exception) { failures.Add(exception); }
+                    if (failures.Count > 0) throw new AggregateException(failures);
                     _appliedWebRules = webKey;
                     _hostsError = null;
-                    AddActivity(webRules.Length > 0
+                    AddActivity(allowOnly ? "Políticas de solo permitidos escritas para Chrome y Edge. Reinicia el navegador y comprueba chrome://policy o edge://policy."
+                        : webRules.Length > 0
                         ? $"Se escribieron {webRules.Length} regla(s) web en hosts."
-                        : "Se verificó la retirada de las reglas web de Cold Ham.");
+                        : "Se verificó la retirada de las reglas web de Cold Ham. Reinicia el navegador si usaste Solo sitios permitidos.");
                 }
                 catch (Exception exception)
                 {
-                    _hostsError = exception is UnauthorizedAccessException
-                        ? "No se pudieron aplicar o retirar las reglas web. Reinicia como administrador y pulsa Reintentar."
+                    _hostsError = exception is UnauthorizedAccessException || exception is AggregateException aggregate && aggregate.InnerExceptions.Any(error => error is UnauthorizedAccessException)
+                        ? "No se pudieron aplicar o retirar las reglas web. Si faltan permisos de hosts, reinicia como administrador y pulsa Reintentar. Si las políticas están administradas por tu organización, consulta a su administrador."
                         : $"No se pudieron aplicar o retirar las reglas web: {exception.Message}";
                     ReportOnce(_hostsError);
                 }
@@ -568,6 +656,7 @@ public partial class MainWindow : Window
     private void CopyRulesToConfiguration()
     {
         _configuration.Websites = _websites.Select(item => item.Value).ToList();
+        _configuration.AllowedWebsites = _allowedWebsites.Select(item => item.Value).ToList();
         _configuration.Applications = _applications.Select(item => item.Value).ToList();
     }
 
@@ -667,17 +756,22 @@ public partial class MainWindow : Window
             ? Visibility.Visible
             : Visibility.Collapsed;
         EnforcementText.Text = "Webs: " + (_hostsError is not null ? "estado sin confirmar; pueden quedar reglas activas"
-            : _appliedWebRules is null ? "sin comprobar" : _appliedWebRules.Length > 0 ? "reglas escritas en hosts" : "sin reglas activas")
+            : _appliedWebRules is null ? "sin comprobar" : _appliedWebRules.StartsWith("allow\n", StringComparison.Ordinal) ? "solo permitidos: políticas escritas; reinicia Chrome/Edge"
+            : _appliedWebRules.Length > 0 ? "reglas escritas en hosts" : "sin reglas activas; reinicia el navegador si usaste Solo permitidos")
             + " · Aplicaciones: " + (_configurationError is not null ? "vigilancia suspendida"
                 : _applicationError is not null ? "error de comprobación"
                 : pendingConsent ? "pendientes de autorización" : _effectiveActive && _applicationsApproved && _applications.Count > 0 ? "vigilando" : "sin vigilancia");
 
         var websiteLabel = _websites.Count == 1 ? "1 sitio web" : $"{_websites.Count} sitios web";
         var applicationLabel = _applications.Count == 1 ? "1 aplicación" : $"{_applications.Count} aplicaciones";
-        SummaryText.Text = $"{websiteLabel} y {applicationLabel} en la lista de bloqueo.";
+        SummaryText.Text = _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites
+            ? $"Modo Solo sitios permitidos (Chrome y Edge): {_allowedWebsites.Count} sitios permitidos. {applicationLabel} en la lista de bloqueo."
+            : $"{websiteLabel} y {applicationLabel} en la lista de bloqueo.";
         WebsiteCountText.Text = _websites.Count == 1 ? "1 regla" : $"{_websites.Count} reglas";
+        AllowedWebsiteCountText.Text = _allowedWebsites.Count == 1 ? "1 sitio" : $"{_allowedWebsites.Count} sitios";
         ApplicationCountText.Text = _applications.Count == 1 ? "1 regla" : $"{_applications.Count} reglas";
         WebsiteEmptyText.Visibility = _websites.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        AllowedWebsiteEmptyText.Visibility = _allowedWebsites.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ApplicationEmptyText.Visibility = _applications.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         UpdateRuleStatuses();
@@ -695,17 +789,24 @@ public partial class MainWindow : Window
 
     private void UpdateRuleStatuses()
     {
+        var allowOnly = _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites;
+        var effectiveDomains = WebsiteRules.GetBlockedDomains(_configuration.Websites, []);
+        var effectiveKey = RuleKey(effectiveDomains);
         foreach (var website in _websites)
         {
-            if (_hostsError is not null)
+            if (_hostsError is not null || _configurationError is not null)
             {
                 website.SetStatus("Sin confirmar", "#B54708");
+            }
+            else if (allowOnly)
+            {
+                website.SetStatus("No se usa en este modo", "#667085");
             }
             else if (!_effectiveActive)
             {
                 website.SetStatus("Preparado", "#667085");
             }
-            else if (_appliedWebRules == RuleKey(_configuration.Websites))
+            else if (_appliedWebRules == effectiveKey)
             {
                 website.SetStatus("En hosts", "#067647");
             }
@@ -713,6 +814,14 @@ public partial class MainWindow : Window
             {
                 website.SetStatus("Pendiente", "#B54708");
             }
+        }
+
+        foreach (var website in _allowedWebsites)
+        {
+            var status = _hostsError is not null || _configurationError is not null ? "Sin confirmar"
+                : !allowOnly ? "Modo desactivado" : !_effectiveActive ? "Preparado"
+                : _appliedWebRules == "allow\n" + RuleKey(_configuration.AllowedWebsites) ? "En políticas" : "Pendiente";
+            website.SetStatus(status, status is "Sin confirmar" or "Pendiente" ? "#B54708" : "#667085");
         }
 
         foreach (var application in _applications)

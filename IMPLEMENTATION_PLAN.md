@@ -14,6 +14,7 @@ Build a simple Windows desktop application in .NET that lets a user maintain web
 4. Manual Start/Stop controls plus an optional weekly time window.
 5. Local JSON persistence, an activity log, validation, duplicate prevention, and clear administrator-rights errors.
 6. A small test project covering domain normalization, hosts-file updates, schedule decisions, and configuration persistence.
+7. An opt-in website allowlist mode for Chrome and Edge: block all website navigation except explicitly allowed domains during manual sessions and weekly schedules.
 
 ### Deliberately deferred
 
@@ -37,6 +38,7 @@ The app runs enforcement in-process on a short timer. This keeps the MVP transpa
 - Domain input is normalized and restricted to valid host names. Wildcards and raw hosts-file lines are rejected.
 - Executable rules retain full paths when supplied. Protected names, executables under Windows, unverifiable paths, wildcards and Cold Ham itself are excluded from termination.
 - The app does not attempt anti-uninstall or privilege escalation.
+- The allowlist mode owns only URL policy values it creates under the current user's Chrome/Edge registry policies. Existing user/machine URL policies cause an actionable conflict instead of being overwritten. A durable local recovery journal records ownership before writes; Stop and startup recovery remove only matching owned values.
 
 ## Interface direction
 
@@ -262,3 +264,39 @@ La entrega se considera terminada cuando se puede iniciar una sesión, ocultar y
 - La ventana incorpora las acciones de sesión y la cuenta atrás. El icono de bandeja ofrece abrir, terminar sesión, detener todo y salir. Cerrar la ventana la oculta; salir termina la sesión, intenta retirar reglas, conserva el horario y libera el icono.
 - `App` usa un mutex local por SID de Windows y una tubería local con un nombre ligado a ese SID: una segunda apertura muestra la ventana existente. El reinicio elevado libera la instancia antes de crear el proceso elevado y recupera la instancia original si se cancela UAC.
 - La validación automática cubre 24 casos. La automatización visual nativa no estuvo disponible en el entorno de desarrollo, por lo que bandeja, el traspaso UAC, una segunda instancia, el escalado 100/150/200 % y la recuperación tras reiniciar Explorer requieren comprobación manual antes de distribuir.
+
+## Distribución portable Windows x64
+
+- Perfil reproducible: `src/ColdHam.App/Properties/PublishProfiles/Portable-win-x64.pubxml`.
+- Generación: `dotnet publish src/ColdHam.App/ColdHam.App.csproj -c Release -p:PublishProfile=Portable-win-x64 -m:1 -p:UseSharedCompilation=false`.
+- Salida: `bin/portable/win-x64/ColdHam.App.exe`, un ejecutable autocontenido que incorpora .NET y WPF, comprime el paquete y extrae las bibliotecas nativas cuando es necesario. No requiere instalación ni un runtime preinstalado. No se usa trimming con WPF.
+- Los ajustes siguen en `%LOCALAPPDATA%/ColdHam`; portable significa ejecución sin instalación, no trasladar automáticamente los ajustes junto al EXE.
+- Entrega adicional: `bin/portable/ColdHam-portable-win-x64.zip`, con ejecutable, instrucciones y SHA-256. Todos los artefactos generados permanecen en `bin/`, ignorado por Git.
+- Verificación: publicación y compilación Release correctas, cabecera PE x64 verificada y 38/38 pruebas aprobadas. NuGet emitió NU1900 al no poder consultar su servicio de vulnerabilidades desde el entorno; se utilizaron los paquetes de runtime 10.0.2 disponibles en caché. No se activó bloqueo real para verificar el paquete.
+
+## Solo sitios permitidos — noviembre de 2026
+
+### Alcance y comportamiento
+
+- La pestaña **Permitidos** permite añadir dominios, eliminar entradas con confirmación y seleccionar **Bloquear toda la web salvo estos sitios (Chrome y Edge)**. El modo requiere activación explícita; las configuraciones antiguas conservan el bloqueo por lista.
+- Durante una sesión o franja activa, el modo escribe `URLBlocklist = *` y excepciones HTTP/HTTPS en `URLAllowlist` para Chrome y Edge. Una lista vacía bloquea todos los sitios web. La lista de sitios bloqueados se conserva, pero no se aplica en este modo; se retiran las entradas propias de hosts al cambiar de modo.
+- Se normalizan URLs, mayúsculas y dominios internacionales. Cada entrada permite el dominio exacto y su variante `www`; otros subdominios se añaden expresamente. Las páginas internas del navegador permanecen disponibles. Se verifica el límite de 1000 patrones después de expandir los dominios (hasta 249 entradas con `www`).
+- Terminar la última fuente de bloqueo, detener todo o salir retira las políticas propias. Al cambiar de modo se reconcilian hosts y políticas; se intentan ambas operaciones incluso si una falla. No se declara éxito si alguna retirada o escritura falla.
+- Chrome/Edge pueden tardar en recargar las políticas: la interfaz indica **políticas escritas**, pide reiniciar el navegador y remite a `chrome://policy` / `edge://policy`. No equivale a una comprobación de navegación real. Las páginas ya cargadas pueden seguir mostrando contenido.
+- Esta implementación cubre los navegadores y perfiles que admiten estas políticas, no otros navegadores o aplicaciones. Edge no aplica estas políticas a perfiles con cuenta Microsoft personal. Las políticas de organización/nube pueden tener precedencia; deben verificarse en el navegador. Un filtro de red universal queda fuera de esta entrega.
+
+### Arquitectura y persistencia
+
+- Configuración versión 3: `AllowedWebsites` y `WebsiteMode` (`BlockListedSites` / `AllowListedSites`). Las versiones anteriores migran con lista permitida vacía y el modo tradicional. La carga y el guardado validan reglas, modo y límites; la recuperación de datos dañados mantiene desactivadas sesiones y horarios.
+- `WebsiteRules` centraliza normalización, expansión y cálculo de dominios. `BrowserPolicyPlan` produce los patrones HTTP/HTTPS exactos y valida el límite de políticas.
+- `BrowserPolicyManager` y su adaptador de registro Windows operan bajo HKCU. Rechazan políticas URL ajenas y las de HKLM, no reescriben listas existentes. `browser-policy-journal.json`, bajo LocalApplicationData/ColdHam, se guarda y vacía a disco antes de escribir las políticas. Las retiradas comparan los valores con el registro de propiedad, preservan cambios ajenos y mantienen el diario si no pueden completar la limpieza. Pueden permanecer claves de registro vacías, sin reglas activas.
+- No se añaden dependencias externas. El bloqueo por lista sigue utilizando exclusivamente la sección propia del archivo hosts.
+
+### Validación
+
+- Compilación completa con `dotnet build ColdHam.slnx --no-restore -m:1 -p:UseSharedCompilation=false`: cero errores y advertencias.
+- 38 pruebas automáticas: normalización, prioridad/transformaciones de hosts, persistencia y migración, horarios/sesiones, generación de patrones, lista vacía, límites, políticas previas de usuario/equipo, cambio de permitidos, retirada tras reiniciar, fallos parciales, reintentos, cambios externos y diario corrupto.
+- Los tests usan hosts temporales y un adaptador de registro simulado; no activan bloqueos reales ni cambian políticas del usuario. Para evitar las restricciones de movimiento de archivos del directorio temporal del entorno, se ejecutan con TEMP/TMP en `TestResults/Temp` (ignorado por Git).
+- Pendiente antes de distribuir: comprobación real de navegación en Chrome y Edge con perfiles compatibles, recarga de políticas y retirada tras reiniciar el navegador, políticas de organización, ventana mínima/escalado y flujo visual de altas/bajas. El intento de apertura con el controlador de Windows no expuso una ventana utilizable; no se afirma validación visual ni del bloqueo real.
+
+Referencias oficiales: [Chrome: permitir o bloquear URLs](https://support.google.com/chrome/a/answer/7532419?hl=en), [formato de filtros de Chromium](https://www.chromium.org/administrators/url-blocklist-filter-format/), [Edge URLAllowlist](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/urlallowlist), [Edge URLBlocklist](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/urlblocklist).

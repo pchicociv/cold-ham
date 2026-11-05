@@ -4,11 +4,15 @@ namespace ColdHam.Core;
 
 public sealed class BlockConfiguration
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
 
     public List<string> Websites { get; set; } = [];
+
+    public List<string> AllowedWebsites { get; set; } = [];
+
+    public WebsiteBlockingMode WebsiteMode { get; set; }
 
     public List<string> Applications { get; set; } = [];
 
@@ -20,6 +24,12 @@ public sealed class BlockConfiguration
     // Kept only to read version 1 settings. The store clears it before its next save.
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? ManualBlockEnabled { get; set; }
+}
+
+public enum WebsiteBlockingMode
+{
+    BlockListedSites,
+    AllowListedSites
 }
 
 public sealed class ManualSession

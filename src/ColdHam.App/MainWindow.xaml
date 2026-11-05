@@ -144,6 +144,61 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="Permitidos">
+                <Grid Margin="24">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="Sitios permitidos (lista blanca)" FontSize="18" FontWeight="SemiBold" />
+                            <CheckBox x:Name="OnlyAllowedWebsitesToggle" Content="Bloquear toda la web salvo estos sitios (Chrome y Edge)" Margin="0,10,0,0" Click="WebsiteModeChanged" />
+                            <TextBlock Text="Durante una sesión o un horario activo, solo se permiten estos dominios y su variante www. Una lista vacía bloquea todos los sitios."
+                                       TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
+                            <TextBlock Text="Reinicia Chrome/Edge tras activar o detener este modo. No cubre otros navegadores ni perfiles de Edge con cuenta Microsoft personal."
+                                       TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <TextBlock x:Name="AllowedWebsiteCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
+                    </Grid>
+                    <Grid Grid.Row="1" Margin="0,18,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="AllowedWebsiteInput" KeyDown="AllowedWebsiteInput_KeyDown" ToolTip="Dominio permitido, por ejemplo: example.com" />
+                        <Button Grid.Column="1" Content="Añadir" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddAllowedWebsiteButton_Click" />
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <ListBox x:Name="AllowedWebsiteList" Background="Transparent" BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4,11">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Value}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Value}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{Binding StatusBrush}" VerticalAlignment="Center" Margin="20,0" />
+                                            <Button Grid.Column="2" Style="{StaticResource InlineDeleteButton}" Click="RemoveAllowedWebsiteItem_Click" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock x:Name="AllowedWebsiteEmptyText" Text="Aún no has añadido sitios permitidos." Foreground="{StaticResource MutedTextBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+
             <TabItem Header="Aplicaciones">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
@@ -235,6 +290,9 @@
                     <TextBlock Text="Sitios web" FontWeight="SemiBold" Margin="0,20,0,5" />
                     <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
                         Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.
+                    </TextBlock>
+                    <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
+                        En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Incluye el dominio y su variante www; añade otros subdominios por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas del navegador siguen disponibles.
                     </TextBlock>
                     <TextBlock Text="Aplicaciones" FontWeight="SemiBold" Margin="0,20,0,5" />
                     <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
