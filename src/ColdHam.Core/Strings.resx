@@ -708,4 +708,43 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
   <data name="IsProtectedAndCannotBeAdded" xml:space="preserve">
     <value>{0} está protegido y no se puede añadir.</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Actualizaciones</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Buscar actualizaciones</value>
+  </data>
+  <data name="InstallUpdate" xml:space="preserve">
+    <value>Actualizar y reiniciar</value>
+  </data>
+  <data name="UpdateExplanation" xml:space="preserve">
+    <value>Busca y descarga nuevas versiones al abrir y cada 6 horas. Se instala desde la bandeja cuando no hay bloqueos, errores ni ediciones pendientes y faltan más de 5 minutos para el próximo horario. También puedes reiniciar con el botón. Requiere conexión solo para actualizar.</value>
+  </data>
+  <data name="UpdateUnavailable" xml:space="preserve">
+    <value>Esta copia no admite actualizaciones automáticas. Instala Cold Ham mediante el instalador de una versión publicada.</value>
+  </data>
+  <data name="UpdateIdle" xml:space="preserve">
+    <value>Pendiente de comprobar actualizaciones.</value>
+  </data>
+  <data name="UpdateChecking" xml:space="preserve">
+    <value>Buscando actualizaciones…</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Descargando y verificando la actualización…</value>
+  </data>
+  <data name="UpdateCurrent" xml:space="preserve">
+    <value>Tienes la última versión publicada.</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Actualización descargada. Se instalará al ocultar la ventana en la bandeja, cuando sea seguro reiniciar.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>No se pudo completar la actualización. Cold Ham sigue funcionando. Puedes reintentar; la comprobación automática se repetirá en 30 minutos. Detalles al situar el puntero aquí.</value>
+  </data>
+  <data name="UpdateRestarting" xml:space="preserve">
+    <value>Reiniciando para instalar la actualización…</value>
+  </data>
+  <data name="UpdateWaiting" xml:space="preserve">
+    <value>En espera: termina los bloqueos, resuelve los avisos y guarda o borra los campos pendientes. No se reinicia cerca del próximo horario.</value>
+  </data>
 </root>

@@ -29,7 +29,19 @@ Build a simple Windows desktop application in .NET that lets a user maintain web
 - `src/ColdHam.Windows`: Windows hosts-file and process enforcement implementations.
 - `tests/ColdHam.Core.Tests`: dependency-free executable test harness so the repository can build and test offline.
 
+The application now uses one external dependency, Velopack, for installation and updates. Core, Windows enforcement and the test harness remain free of external packages. A first build requires restoring Velopack; subsequent builds/tests can run offline with restored assets.
+
 The app runs enforcement in-process on a short timer. This keeps the MVP transparent and easy to uninstall. A Windows service can be introduced later if enforcement must continue after the UI exits.
+
+## Actualizaciones automáticas — noviembre de 2026
+
+- Velopack y `vpk` fijados a 1.2.161, con arranque WPF explícito anterior al control de instancia única. Se desactiva la instalación implícita de actualizaciones al arrancar para evaluar primero sesiones y recuperación.
+- `UpdateCoordinator` y `UpdateRestartPolicy` en Core; adaptador de Velopack y controles de Ayuda en App. Comprobación al inicio/cada seis horas, descarga verificada, reintento tras treinta minutos y acciones manuales. El fallo del canal de actualización no detiene el bloqueo.
+- Reinicio automático desde la bandeja o manual desde Ayuda, siempre sin bloqueos activos, errores/recuperación pendientes, operaciones concurrentes ni ediciones sin guardar. Retirada web confirmada y margen mínimo de cinco minutos antes del próximo horario. Se conserva el formato de configuración y su ubicación externa a la instalación.
+- Perfil autónomo Windows x64 para actualizaciones, script de construcción/pruebas/empaquetado y workflow de Releases por etiquetas `vMAJOR.MINOR.PATCH`. El repositorio público `pchicociv/cold-ham` aloja los paquetes; el cliente no incluye credenciales. Ejecuciones manuales del workflow generan artefactos sin publicar.
+- Se mantiene el ejecutable portátil anterior; para empezar a recibir actualizaciones se instala una vez la versión empaquetada. El lanzador `ColdHam.exe` también está protegido frente a reglas de cierre.
+- Validación: 46 pruebas de dominio/integración, compilación completa sin advertencias, empaquetado local y renderizado WPF de Ayuda en español/inglés. Pendiente: prueba de actualización instalada entre dos Releases, UAC y recuperación ante una interrupción de la instalación. No se ha configurado firma Authenticode.
+- Publicación, firma y aceptación manual documentadas en `RELEASING.md`.
 
 ## Safety and reversibility
 

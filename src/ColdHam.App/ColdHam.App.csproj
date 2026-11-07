@@ -6,8 +6,15 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>ColdHam.App</AssemblyName>
     <RootNamespace>ColdHam.App</RootNamespace>
+    <StartupObject>ColdHam.App.App</StartupObject>
+    <Version>1.0.0</Version>
+    <UpdateRepositoryUrl Condition="'$(UpdateRepositoryUrl)' == ''">https://github.com/pchicociv/cold-ham</UpdateRepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
+    <AssemblyMetadata Include="UpdateRepositoryUrl" Value="$(UpdateRepositoryUrl)" />
     <ProjectReference Include="../ColdHam.Windows/ColdHam.Windows.csproj" />
   </ItemGroup>
 </Project>

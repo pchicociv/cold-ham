@@ -8,7 +8,7 @@ public static partial class RuleNormalizer
 {
     private static readonly HashSet<string> ProtectedExecutables = new(StringComparer.OrdinalIgnoreCase)
     {
-        "coldham.app.exe", "system.exe", "idle.exe", "registry.exe", "smss.exe", "csrss.exe",
+        "coldham.app.exe", "coldham.exe", "system.exe", "idle.exe", "registry.exe", "smss.exe", "csrss.exe",
         "wininit.exe", "winlogon.exe", "services.exe", "lsass.exe", "svchost.exe", "dwm.exe",
         "explorer.exe", "taskmgr.exe", "conhost.exe", "fontdrvhost.exe", "sihost.exe",
         "shellexperiencehost.exe", "startmenuexperiencehost.exe", "searchhost.exe"

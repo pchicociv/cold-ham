@@ -1,0 +1,61 @@
+name: Windows release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Stable version to package, for example 1.0.0 (artifacts only)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate version
+        id: version
+        shell: pwsh
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          $version = if ($env:GITHUB_EVENT_NAME -eq 'push') { $env:GITHUB_REF_NAME.Substring(1) } else { $env:REQUESTED_VERSION }
+          if ($version -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected a stable version: vMAJOR.MINOR.PATCH tag or MAJOR.MINOR.PATCH input.' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Build, test and package
+        id: package
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/Build-Release.ps1 -Version $env:RELEASE_VERSION
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ColdHam-${{ steps.version.outputs.version }}-win-x64
+          path: ${{ steps.package.outputs.packages }}/*
+          if-no-files-found: error
+      - name: Publish GitHub release
+        if: github.event_name == 'push' && github.repository == 'pchicociv/cold-ham'
+        shell: pwsh
+        env:
+          VPK_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGES_PATH: ${{ steps.package.outputs.packages }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY"
+          if ($release.private) { throw 'Updates require publicly accessible release assets.' }
+          dotnet tool run vpk -- upload github --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" --outputDir $env:PACKAGES_PATH --channel win --publish --releaseName "Cold Ham $env:RELEASE_VERSION" --tag $env:GITHUB_REF_NAME
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }

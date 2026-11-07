@@ -63,6 +63,7 @@ public partial class MainWindow : Window
         ApplicationList.ItemsSource = _applications;
         ActivityList.ItemsSource = _activity;
         _timer.Tick += Timer_Tick;
+        InitializeUpdates();
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -109,6 +110,7 @@ public partial class MainWindow : Window
         }
 
         UpdateStatus();
+        await StartUpdateChecksAsync();
     }
 
     private void ApplyLanguage(string language)
@@ -818,6 +820,7 @@ public partial class MainWindow : Window
                 : LocalizedText.Get("NoManualSessionIsInProgress");
         TrayStatus = StatusTitleText.Text + " · " + NextChangeText.Text;
         BlockStateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateUpdateStatus();
     }
 
     private void UpdateRuleStatuses()

@@ -708,4 +708,43 @@ Save your work before continuing. Authorize these closures? If you choose No, we
   <data name="IsProtectedAndCannotBeAdded" xml:space="preserve">
     <value>{0} is protected and cannot be added.</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="InstallUpdate" xml:space="preserve">
+    <value>Update and restart</value>
+  </data>
+  <data name="UpdateExplanation" xml:space="preserve">
+    <value>Checks and downloads updates on launch and every 6 hours. Installs from the tray when there are no blocks, errors or unsaved edits and the next scheduled block is over 5 minutes away. You can also restart using the button. Only updating requires a connection.</value>
+  </data>
+  <data name="UpdateUnavailable" xml:space="preserve">
+    <value>This copy does not support automatic updates. Install Cold Ham using a published release installer.</value>
+  </data>
+  <data name="UpdateIdle" xml:space="preserve">
+    <value>Waiting to check for updates.</value>
+  </data>
+  <data name="UpdateChecking" xml:space="preserve">
+    <value>Checking for updates…</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloading and verifying the update…</value>
+  </data>
+  <data name="UpdateCurrent" xml:space="preserve">
+    <value>You have the latest published version.</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Update downloaded. It will install after hiding the window to the tray, when it is safe to restart.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>The update could not be completed. Cold Ham continues running. You can retry; the automatic check will run again in 30 minutes. Hover here for details.</value>
+  </data>
+  <data name="UpdateRestarting" xml:space="preserve">
+    <value>Restarting to install the update…</value>
+  </data>
+  <data name="UpdateWaiting" xml:space="preserve">
+    <value>Waiting: finish blocks, resolve warnings and save or clear pending fields. Restart is deferred near the next scheduled block.</value>
+  </data>
 </root>

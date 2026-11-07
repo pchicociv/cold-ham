@@ -10,6 +10,16 @@ namespace ColdHam.App;
 
 public partial class App : Application
 {
+    [STAThread]
+    private static void Main()
+    {
+        // Cold Ham must recover/evaluate sessions before deciding whether a restart is safe.
+        Velopack.VelopackApp.Build().SetAutoApplyOnStartup(false).Run();
+        var app = new App();
+        app.InitializeComponent();
+        app.Run();
+    }
+
     private Mutex? _instanceMutex;
     private CancellationTokenSource? _activationCancellation;
     private MainWindow? _mainWindow;
@@ -48,6 +58,7 @@ public partial class App : Application
 
     internal void ExitApplication()
     {
+        _mainWindow?.StopUpdateChecks();
         _tray?.Dispose();
         _activationCancellation?.Cancel();
         _instanceMutex?.ReleaseMutex();

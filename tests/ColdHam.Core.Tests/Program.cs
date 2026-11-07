@@ -3,6 +3,12 @@ using ColdHam.Windows;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("defers updates until sessions, recovery and edits are settled", UpdateTests.RestartSafety),
+    ("defers updates near scheduled and overnight blocks", UpdateTests.ScheduleSafety),
+    ("downloads before authorizing a safe single restart", UpdateTests.DownloadAndRestart),
+    ("recovers download and updater failures with bounded retries", UpdateTests.FailuresAndRetry),
+    ("handles offline checks, cadence and unpackaged builds", UpdateTests.OfflineAndCadence),
+    ("serializes update checks and cancels interrupted downloads", UpdateTests.ConcurrentChecksAndCancellation),
     ("normalizes website URLs", NormalizeWebsite),
     ("rejects wildcard websites", RejectWildcard),
     ("normalizes executable names", NormalizeExecutable),
@@ -86,6 +92,8 @@ static Task NormalizeExecutable()
 static Task ProtectSystemExecutable()
 {
     Assert(!RuleNormalizer.TryNormalizeApplication("explorer.exe", out _, out _), "Explorer must be protected.");
+    Assert(!RuleNormalizer.TryNormalizeApplication("ColdHam.exe", out _, out _), "Installed Cold Ham launcher must be protected.");
+    Assert(!RuleNormalizer.TryNormalizeApplication("ColdHam.App.exe", out _, out _), "Cold Ham must be protected.");
     return Task.CompletedTask;
 }
 
