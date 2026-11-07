@@ -13,6 +13,10 @@
 
         <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="24,17">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -21,21 +25,30 @@
                     <TextBlock Text="COLD HAM" FontSize="12" FontWeight="Bold" Foreground="{StaticResource MutedTextBrush}" />
                     <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
                         <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#98A2B3" Margin="0,0,9,0" VerticalAlignment="Center" />
-                        <TextBlock x:Name="StatusTitleText" Text="Cargando…" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Name="StatusTitleText" Text="{DynamicResource Loading}" FontSize="20" FontWeight="SemiBold" />
                     </StackPanel>
                     <TextBlock x:Name="StatusText" Margin="19,3,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
                     <TextBlock x:Name="NextChangeText" Margin="19,2,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
                     <TextBlock x:Name="EnforcementText" Margin="19,3,0,0" TextWrapping="Wrap" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,0,0,0">
+                    <Label Content="{DynamicResource Language}" Target="{Binding ElementName=LanguageSelector}" VerticalAlignment="Center" />
+                    <ComboBox x:Name="LanguageSelector" Width="110" MinHeight="30" VerticalContentAlignment="Center" IsEnabled="False"
+                              SelectedValuePath="Tag" SelectionChanged="LanguageSelector_SelectionChanged"
+                              AutomationProperties.Name="{DynamicResource Language}">
+                        <ComboBoxItem Content="Español" Tag="es" />
+                        <ComboBoxItem Content="English" Tag="en" />
+                    </ComboBox>
+                </StackPanel>
+                <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,14,0,0" VerticalAlignment="Center">
                     <Button x:Name="Start25Button" Content="25 min" Style="{StaticResource PrimaryButton}" Click="Start25Button_Click" />
                     <Button x:Name="Start50Button" Content="50 min" Style="{StaticResource PrimaryButton}" Click="Start50Button_Click" />
-                    <TextBox x:Name="SessionMinutesInput" Width="54" Margin="4,0" ToolTip="Minutos: entre 1 y 1440" />
-                    <Button x:Name="StartCustomButton" Content="Iniciar" Style="{StaticResource PrimaryButton}" Click="StartCustomButton_Click" />
-                    <Button x:Name="StartButton" Content="Sin límite" Click="StartButton_Click" />
-                    <Button x:Name="EndSessionButton" Content="Terminar sesión" Click="EndSessionButton_Click" />
-                    <Button x:Name="StopButton" Content="Detener todo" Style="{StaticResource DangerButton}" Click="StopButton_Click" />
-                </StackPanel>
+                    <TextBox x:Name="SessionMinutesInput" Width="54" Margin="4,0" ToolTip="{DynamicResource MinutesBetweenAnd}" />
+                    <Button x:Name="StartCustomButton" Content="{DynamicResource Start}" Style="{StaticResource PrimaryButton}" Click="StartCustomButton_Click" />
+                    <Button x:Name="StartButton" Content="{DynamicResource Unlimited}" Click="StartButton_Click" />
+                    <Button x:Name="EndSessionButton" Content="{DynamicResource EndSession}" Click="EndSessionButton_Click" />
+                    <Button x:Name="StopButton" Content="{DynamicResource StopAll}" Style="{StaticResource DangerButton}" Click="StopButton_Click" />
+                </WrapPanel>
             </Grid>
         </Border>
 
@@ -47,21 +60,21 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Revisión necesaria" FontWeight="SemiBold" />
+                    <TextBlock Text="{DynamicResource AttentionNeeded}" FontWeight="SemiBold" />
                     <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
                         <TextBlock x:Name="RecoveryText" Text=""
                                    Foreground="#7A5A10" Margin="0,2,16,0" TextWrapping="Wrap" />
                     </ScrollViewer>
                 </StackPanel>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <Button Content="Reintentar" Click="RetryButton_Click" />
-                    <Button Content="Reiniciar como administrador" Click="ElevateButton_Click" />
+                    <Button Content="{DynamicResource Retry}" Click="RetryButton_Click" />
+                    <Button Content="{DynamicResource RestartAsAdministrator}" Click="ElevateButton_Click" />
                 </StackPanel>
             </Grid>
         </Border>
 
         <TabControl Grid.Row="2" x:Name="MainTabs" Margin="20,16,20,0">
-            <TabItem Header="Resumen">
+            <TabItem Header="{DynamicResource Overview}">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -69,28 +82,26 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <TextBlock Text="Configuración actual" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource CurrentConfiguration}" FontSize="18" FontWeight="SemiBold" />
                         <TextBlock x:Name="SummaryText" FontSize="15" Margin="0,8,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="SessionSummaryText" Margin="0,7,0,0" FontWeight="SemiBold" TextWrapping="Wrap" />
                     </StackPanel>
                     <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,22,0,0" Padding="0,20,0,0">
                         <StackPanel>
-                            <TextBlock Text="Programación" FontWeight="SemiBold" />
+                            <TextBlock Text="{DynamicResource Scheduling}" FontWeight="SemiBold" />
                             <TextBlock x:Name="OverviewScheduleText" Margin="0,6,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
                         </StackPanel>
                     </Border>
                     <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,22,0,0" Padding="0,20,0,0">
                         <StackPanel>
-                            <TextBlock Text="Funcionamiento" FontWeight="SemiBold" />
-                            <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                                Mantén Cold Ham abierto para bloquear aplicaciones. Las reglas web permanecen en el archivo hosts hasta detener el bloqueo.
-                            </TextBlock>
+                            <TextBlock Text="{DynamicResource Operation}" FontWeight="SemiBold" />
+                            <TextBlock Margin="0,6,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource KeepColdHamOpenToBlockApplications}" />
                         </StackPanel>
                     </Border>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Sitios web">
+            <TabItem Header="{DynamicResource WebsitesTab}">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -103,8 +114,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="Sitios bloqueados" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Añade un dominio o pega una dirección web." Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
+                            <TextBlock Text="{DynamicResource BlockedWebsites}" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="{DynamicResource AddADomainOrPasteAWeb}" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                         </StackPanel>
                         <TextBlock x:Name="WebsiteCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
                     </Grid>
@@ -113,8 +124,8 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="WebsiteInput" KeyDown="WebsiteInput_KeyDown" ToolTip="Ejemplo: reddit.com" />
-                        <Button Grid.Column="1" Content="Añadir" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddWebsiteButton_Click" />
+                        <TextBox x:Name="WebsiteInput" KeyDown="WebsiteInput_KeyDown" ToolTip="{DynamicResource ExampleRedditCom}" />
+                        <Button Grid.Column="1" Content="{DynamicResource Add}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddWebsiteButton_Click" />
                     </Grid>
                     <Grid Grid.Row="2">
                         <ListBox x:Name="WebsiteList" Background="Transparent" BorderThickness="0">
@@ -129,7 +140,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Value}" FontWeight="SemiBold" />
-                                                <TextBlock Text="Dominio y variante www" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,2,0,0" />
+                                                <TextBlock Text="{DynamicResource DomainAndWwwVariant}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,2,0,0" />
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{Binding StatusBrush}" VerticalAlignment="Center" Margin="20,0" />
                                             <Button Grid.Column="2" Style="{StaticResource InlineDeleteButton}" Click="RemoveWebsiteItem_Click" />
@@ -138,13 +149,13 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <TextBlock x:Name="WebsiteEmptyText" Text="Aún no has añadido sitios web." Foreground="{StaticResource MutedTextBrush}"
+                        <TextBlock x:Name="WebsiteEmptyText" Text="{DynamicResource NoWebsitesAddedYet}" Foreground="{StaticResource MutedTextBrush}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
                     </Grid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Permitidos">
+            <TabItem Header="{DynamicResource Allowed}">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -157,11 +168,11 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,16,0">
-                            <TextBlock Text="Sitios permitidos (lista blanca)" FontSize="18" FontWeight="SemiBold" />
-                            <CheckBox x:Name="OnlyAllowedWebsitesToggle" Content="Bloquear toda la web salvo estos sitios (Chrome y Edge)" Margin="0,10,0,0" Click="WebsiteModeChanged" />
-                            <TextBlock Text="Durante una sesión o un horario activo, solo se permiten estos dominios y su variante www. Una lista vacía bloquea todos los sitios."
+                            <TextBlock Text="{DynamicResource AllowedWebsitesAllowlist}" FontSize="18" FontWeight="SemiBold" />
+                            <CheckBox x:Name="OnlyAllowedWebsitesToggle" Content="{DynamicResource BlockAllWebsitesExceptTheseChromeAnd}" Margin="0,10,0,0" Click="WebsiteModeChanged" />
+                            <TextBlock Text="{DynamicResource DuringASessionOrActiveScheduleOnly}"
                                        TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
-                            <TextBlock Text="Reinicia Chrome/Edge tras activar o detener este modo. No cubre otros navegadores ni perfiles de Edge con cuenta Microsoft personal."
+                            <TextBlock Text="{DynamicResource RestartChromeEdgeAfterEnablingOrStopping}"
                                        TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                         </StackPanel>
                         <TextBlock x:Name="AllowedWebsiteCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
@@ -171,8 +182,8 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="AllowedWebsiteInput" KeyDown="AllowedWebsiteInput_KeyDown" ToolTip="Dominio permitido, por ejemplo: example.com" />
-                        <Button Grid.Column="1" Content="Añadir" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddAllowedWebsiteButton_Click" />
+                        <TextBox x:Name="AllowedWebsiteInput" KeyDown="AllowedWebsiteInput_KeyDown" ToolTip="{DynamicResource AllowedDomainForExampleExampleCom}" />
+                        <Button Grid.Column="1" Content="{DynamicResource Add}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddAllowedWebsiteButton_Click" />
                     </Grid>
                     <Grid Grid.Row="2">
                         <ListBox x:Name="AllowedWebsiteList" Background="Transparent" BorderThickness="0">
@@ -193,13 +204,13 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <TextBlock x:Name="AllowedWebsiteEmptyText" Text="Aún no has añadido sitios permitidos." Foreground="{StaticResource MutedTextBrush}"
+                        <TextBlock x:Name="AllowedWebsiteEmptyText" Text="{DynamicResource NoAllowedWebsitesAddedYet}" Foreground="{StaticResource MutedTextBrush}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
                     </Grid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Aplicaciones">
+            <TabItem Header="{DynamicResource ApplicationsTab}">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -212,8 +223,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="Aplicaciones bloqueadas" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Selecciona un ejecutable o escribe su nombre de proceso." Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
+                            <TextBlock Text="{DynamicResource BlockedApplications}" FontSize="18" FontWeight="SemiBold" />
+                            <TextBlock Text="{DynamicResource SelectAnExecutableOrEnterItsProcess}" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                         </StackPanel>
                         <TextBlock x:Name="ApplicationCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
                     </Grid>
@@ -223,9 +234,9 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="ApplicationInput" KeyDown="ApplicationInput_KeyDown" ToolTip="Ejemplo: juego.exe" />
-                        <Button Grid.Column="1" Content="Añadir" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddApplicationButton_Click" />
-                        <Button Grid.Column="2" Content="Examinar…" Margin="8,0,0,0" Click="BrowseApplicationButton_Click" />
+                        <TextBox x:Name="ApplicationInput" KeyDown="ApplicationInput_KeyDown" ToolTip="{DynamicResource ExampleGameExe}" />
+                        <Button Grid.Column="1" Content="{DynamicResource Add}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddApplicationButton_Click" />
+                        <Button Grid.Column="2" Content="{DynamicResource Browse}" Margin="8,0,0,0" Click="BrowseApplicationButton_Click" />
                     </Grid>
                     <Grid Grid.Row="2">
                         <ListBox x:Name="ApplicationList" Background="Transparent" BorderThickness="0">
@@ -249,66 +260,60 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <TextBlock x:Name="ApplicationEmptyText" Text="Aún no has añadido aplicaciones." Foreground="{StaticResource MutedTextBrush}"
+                        <TextBlock x:Name="ApplicationEmptyText" Text="{DynamicResource NoApplicationsAddedYet}" Foreground="{StaticResource MutedTextBrush}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
                     </Grid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Horario">
-                <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
-                    <TextBlock Text="Programación semanal" FontSize="18" FontWeight="SemiBold" />
-                    <CheckBox x:Name="ScheduleEnabled" Content="Activar horario" FontWeight="SemiBold" Margin="0,18,0,0" Click="ScheduleControlChanged" />
-                    <TextBlock Text="Días activos" Margin="0,22,0,9" FontWeight="SemiBold" />
-                    <StackPanel Orientation="Horizontal">
-                        <ToggleButton x:Name="MondayToggle" Content="Lun" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="TuesdayToggle" Content="Mar" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="WednesdayToggle" Content="Mié" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="ThursdayToggle" Content="Jue" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="FridayToggle" Content="Vie" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="SaturdayToggle" Content="Sáb" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
-                        <ToggleButton x:Name="SundayToggle" Content="Dom" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+            <TabItem Header="{DynamicResource Schedule}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
+                        <TextBlock Text="{DynamicResource WeeklySchedule}" FontSize="18" FontWeight="SemiBold" />
+                        <CheckBox x:Name="ScheduleEnabled" Content="{DynamicResource EnableSchedule}" FontWeight="SemiBold" Margin="0,18,0,0" Click="ScheduleControlChanged" />
+                        <TextBlock Text="{DynamicResource ActiveDays}" Margin="0,22,0,9" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="MondayToggle" Content="{DynamicResource Mon}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="TuesdayToggle" Content="{DynamicResource Tue}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="WednesdayToggle" Content="{DynamicResource Wed}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="ThursdayToggle" Content="{DynamicResource Thu}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="FridayToggle" Content="{DynamicResource Fri}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="SaturdayToggle" Content="{DynamicResource Sat}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                            <ToggleButton x:Name="SundayToggle" Content="{DynamicResource Sun}" Style="{StaticResource DayToggle}" Click="ScheduleControlChanged" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource TimeRange}" Margin="0,22,0,9" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource From}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBox x:Name="StartTimeInput" Width="90" Text="09:00" LostKeyboardFocus="ScheduleTime_LostKeyboardFocus" KeyDown="ScheduleTime_KeyDown" />
+                            <TextBlock Text="{DynamicResource To}" VerticalAlignment="Center" Margin="14,0,8,0" />
+                            <TextBox x:Name="EndTimeInput" Width="90" Text="17:00" LostKeyboardFocus="ScheduleTime_LostKeyboardFocus" KeyDown="ScheduleTime_KeyDown" />
+                        </StackPanel>
+                        <TextBlock x:Name="ScheduleSummaryText" Margin="0,20,0,0" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock x:Name="ScheduleValidationText" Margin="0,6,0,0" Foreground="#B42318" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,18,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource TheScheduleIsSavedAutomaticallyIfThe}" />
                     </StackPanel>
-                    <TextBlock Text="Franja horaria" Margin="0,22,0,9" FontWeight="SemiBold" />
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Desde" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBox x:Name="StartTimeInput" Width="90" Text="09:00" LostKeyboardFocus="ScheduleTime_LostKeyboardFocus" KeyDown="ScheduleTime_KeyDown" />
-                        <TextBlock Text="hasta" VerticalAlignment="Center" Margin="14,0,8,0" />
-                        <TextBox x:Name="EndTimeInput" Width="90" Text="17:00" LostKeyboardFocus="ScheduleTime_LostKeyboardFocus" KeyDown="ScheduleTime_KeyDown" />
-                    </StackPanel>
-                    <TextBlock x:Name="ScheduleSummaryText" Margin="0,20,0,0" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
-                    <TextBlock x:Name="ScheduleValidationText" Margin="0,6,0,0" Foreground="#B42318" TextWrapping="Wrap" />
-                    <TextBlock Margin="0,18,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                        El horario se guarda automáticamente. Si la hora final es anterior a la inicial, el bloqueo continuará durante la noche.
-                    </TextBlock>
-                </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Ayuda">
-                <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
-                    <TextBlock Text="Cómo funciona" FontSize="18" FontWeight="SemiBold" />
-                    <TextBlock Text="Sitios web" FontWeight="SemiBold" Margin="0,20,0,5" />
-                    <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                        Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.
-                    </TextBlock>
-                    <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                        En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Incluye el dominio y su variante www; añade otros subdominios por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas del navegador siguen disponibles.
-                    </TextBlock>
-                    <TextBlock Text="Aplicaciones" FontWeight="SemiBold" Margin="0,20,0,5" />
-                    <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                        Cold Ham vigila los procesos configurados mientras la aplicación está abierta. Al iniciar un bloqueo, cualquier aplicación coincidente se cerrará y podría perder trabajo sin guardar.
-                    </TextBlock>
-                    <TextBlock Text="Permisos" FontWeight="SemiBold" Margin="0,20,0,5" />
-                    <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap">
-                        Editar el archivo hosts requiere permisos de administrador. Puedes configurar las reglas sin elevar permisos y reiniciar como administrador al aplicarlas.
-                    </TextBlock>
-                </StackPanel>
+            <TabItem Header="{DynamicResource Help}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
+                        <TextBlock Text="{DynamicResource HowItWorks}" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource WebsitesTab}" FontWeight="SemiBold" Margin="0,20,0,5" />
+                        <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource ColdHamBlocksExactDomainsAndTheir}" />
+                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource InAllowedYouCanEnableAllowedWebsites}" />
+                        <TextBlock Text="{DynamicResource ApplicationsTab}" FontWeight="SemiBold" Margin="0,20,0,5" />
+                        <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource ColdHamMonitorsConfiguredProcessesWhileThe}" />
+                        <TextBlock Text="{DynamicResource Permissions}" FontWeight="SemiBold" Margin="0,20,0,5" />
+                        <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource EditingTheHostsFileRequiresAdministratorPermissions}" />
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 
         <Expander Grid.Row="3" Margin="20,10,20,18" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
             <Expander.Header>
-                <TextBlock x:Name="ActivityHeaderText" Text="Actividad" FontWeight="SemiBold" Margin="8,5" />
+                <TextBlock x:Name="ActivityHeaderText" Text="{DynamicResource Activity}" FontWeight="SemiBold" Margin="8,5" />
             </Expander.Header>
             <ListBox x:Name="ActivityList" BorderThickness="0" MaxHeight="150" Margin="8,0,8,8" FontFamily="Consolas" FontSize="12" />
         </Expander>

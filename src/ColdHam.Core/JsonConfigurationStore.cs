@@ -57,9 +57,9 @@ public sealed class JsonConfigurationStore
             recovered.ManualSession = null;
             recovered.ManualBlockEnabled = null;
             recovered.Schedule.Enabled = false;
-            RecoveryMessage = $"Configuración dañada conservada en {preserved}. " +
-                (usedBackup ? "Se recuperó la copia anterior. " : "Se inició una configuración vacía. ") +
-                "La activación manual y el horario están desactivados. Comprueba el estado de retirada de las reglas web y revisa la configuración antes de activarla.";
+            RecoveryMessage = LocalizedText.Format("DamagedConfigurationPreservedAt", preserved) +
+                (usedBackup ? LocalizedText.Get("ThePreviousBackupWasRecovered") : LocalizedText.Get("AnEmptyConfigurationWasCreated")) +
+                LocalizedText.Get("ManualActivationAndTheScheduleAreDisabled");
             return recovered;
         }
     }
@@ -70,7 +70,7 @@ public sealed class JsonConfigurationStore
         using var document = JsonDocument.Parse(bytes);
         if (document.RootElement.ValueKind != JsonValueKind.Object)
         {
-            throw new InvalidDataException("La configuración debe ser un objeto JSON.");
+            throw new InvalidDataException(LocalizedText.Get("TheConfigurationMustBeAJSONObject"));
         }
         if (document.RootElement.TryGetProperty("Version", out var version)
             && version.ValueKind == JsonValueKind.Number
@@ -80,7 +80,7 @@ public sealed class JsonConfigurationStore
         }
 
         var configuration = JsonSerializer.Deserialize<BlockConfiguration>(bytes, SerializerOptions)
-            ?? throw new InvalidDataException("La configuración está vacía.");
+            ?? throw new InvalidDataException(LocalizedText.Get("TheConfigurationIsEmpty"));
         Migrate(configuration);
         Validate(configuration);
         return configuration;
@@ -90,7 +90,7 @@ public sealed class JsonConfigurationStore
     {
         if (configuration.Version is < 1 or > BlockConfiguration.CurrentVersion)
         {
-            throw new InvalidDataException("La versión de configuración no es válida.");
+            throw new InvalidDataException(LocalizedText.Get("TheConfigurationVersionIsInvalid"));
         }
 
         if (configuration.ManualSession is null && configuration.ManualBlockEnabled == true)
@@ -108,6 +108,7 @@ public sealed class JsonConfigurationStore
 
     private static void Validate(BlockConfiguration configuration)
     {
+        configuration.Language = LocalizedText.NormalizeLanguage(configuration.Language);
         if (configuration.Version != BlockConfiguration.CurrentVersion || configuration.Websites is null || configuration.AllowedWebsites is null || configuration.Applications is null || configuration.Schedule?.Days is null
             || !Enum.IsDefined(configuration.WebsiteMode)
             || configuration.Schedule.Days.Any(day => !Enum.IsDefined(day))
@@ -118,7 +119,7 @@ public sealed class JsonConfigurationStore
             || configuration.AllowedWebsites.Any(value => !RuleNormalizer.TryNormalizeDomain(value, out _, out _))
             || configuration.Applications.Any(value => !RuleNormalizer.TryNormalizeApplication(value, out _, out _)))
         {
-            throw new InvalidDataException("La configuración contiene reglas o un horario no válidos.");
+            throw new InvalidDataException(LocalizedText.Get("TheConfigurationContainsInvalidRulesOrAn"));
         }
         if (configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites)
             BrowserPolicyPlan.BuildAllowlist(configuration.AllowedWebsites);
@@ -162,5 +163,5 @@ public sealed class JsonConfigurationStore
 public sealed class UnsupportedConfigurationVersionException : Exception
 {
     public UnsupportedConfigurationVersionException()
-        : base("Esta configuración fue creada por una versión más nueva de Cold Ham. Actualiza la aplicación; no se modificó el archivo.") { }
+        : base(LocalizedText.Get("ThisConfigurationWasCreatedByANewer")) { }
 }

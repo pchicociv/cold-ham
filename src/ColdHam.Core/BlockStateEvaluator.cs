@@ -35,7 +35,7 @@ public static class BlockStateEvaluator
         error = string.Empty;
         if (minutes is < 1 or > 1440)
         {
-            error = "La duración debe ser un número entero entre 1 y 1440 minutos.";
+            error = LocalizedText.Get("DurationMustBeAWholeNumberBetween");
             return false;
         }
 

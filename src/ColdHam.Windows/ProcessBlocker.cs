@@ -41,17 +41,17 @@ public sealed class ProcessBlocker
                         if (executablePath is null || executablePath.StartsWith(windowsPath, StringComparison.OrdinalIgnoreCase)
                             || string.Equals(executablePath, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
                         {
-                            errors.Add($"Proceso protegido o ruta no verificable: PID {process.Id}.");
+                            errors.Add(LocalizedText.Format("ProtectedProcessOrUnverifiablePathPID", process.Id));
                             continue;
                         }
                         process.Kill(false);
                         if (process.WaitForExit(1500)) terminated++;
-                        else errors.Add($"No se confirmó el cierre del proceso {process.Id}.");
+                        else errors.Add(LocalizedText.Format("ClosureOfProcessWasNotConfirmed", process.Id));
                     }
                 }
                 catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
                 {
-                    errors.Add($"No se pudo comprobar o cerrar el proceso {process.Id}: {exception.Message}");
+                    errors.Add(LocalizedText.Format("CouldNotCheckOrCloseProcess", process.Id, exception.Message));
                 }
             }
         }
@@ -83,7 +83,7 @@ public sealed class ProcessBlocker
             }
             catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
             {
-                throw new InvalidOperationException($"No se pudo verificar la ruta para la regla {rule.Value}.", exception);
+                throw new InvalidOperationException(LocalizedText.Format("CouldNotVerifyThePathForRule", rule.Value), exception);
             }
         }
 

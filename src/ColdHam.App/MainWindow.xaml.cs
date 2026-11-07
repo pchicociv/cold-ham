@@ -21,7 +21,6 @@ namespace ColdHam.App;
 
 public partial class MainWindow : Window
 {
-    private static readonly CultureInfo SpanishCulture = CultureInfo.GetCultureInfo("es-ES");
     private readonly ObservableCollection<RuleRow> _websites = [];
     private readonly ObservableCollection<RuleRow> _allowedWebsites = [];
     private readonly ObservableCollection<RuleRow> _applications = [];
@@ -71,6 +70,7 @@ public partial class MainWindow : Window
         try
         {
             _configuration = await _store.LoadAsync();
+            ApplyLanguage(_configuration.Language);
             _loadFailed = false;
             _configurationError = null;
             _websites.Clear();
@@ -96,25 +96,55 @@ public partial class MainWindow : Window
             PopulateSchedule(_configuration.Schedule);
             OnlyAllowedWebsitesToggle.IsChecked = _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites;
             _loading = false;
-            AddActivity($"Configuración cargada desde {_store.FilePath}");
+            AddActivity(LocalizedText.Format("ConfigurationLoadedFrom", _store.FilePath));
             await ApplyDesiredStateAsync(forceHosts: true);
             _timer.Start();
         }
         catch (Exception exception)
         {
             _loading = false;
-            _configurationError = "No se pudo cargar la configuración. Revisa el archivo y reinicia Cold Ham. " + exception.Message;
+            _configurationError = LocalizedText.Get("CouldNotLoadTheConfigurationCheckThe") + exception.Message;
             _loadFailed = true;
-            ShowError("No se pudo cargar la configuración.", exception);
+            ShowError(LocalizedText.Get("CouldNotLoadTheConfiguration"), exception);
         }
 
+        UpdateStatus();
+    }
+
+    private void ApplyLanguage(string language)
+    {
+        LocalizedText.SetLanguage(language);
+        ((App)Application.Current).UpdateLanguageResources();
+        Language = System.Windows.Markup.XmlLanguage.GetLanguage(LocalizedText.Culture.Name);
+        LanguageSelector.SelectedValue = LocalizedText.Language;
+    }
+
+    private async void LanguageSelector_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (_loading || _saving || _applying || _loadFailed
+            || LanguageSelector.SelectedValue is not string language || language == _configuration.Language) return;
+
+        var previousLanguage = _configuration.Language;
+        _configuration.Language = language;
+        ApplyLanguage(language);
+        if (!await SaveAsync())
+        {
+            _configuration.Language = previousLanguage;
+            ApplyLanguage(previousLanguage);
+        }
+
+        if (ScheduleValidationText.Text.Length > 0)
+        {
+            TryReadSchedule(out _, out var error);
+            ScheduleValidationText.Text = error;
+        }
         UpdateStatus();
     }
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
     {
         _configuration.ManualSession = BlockStateEvaluator.CreateUnlimitedSession(_clock);
-        await StartSessionAsync("Sesión sin límite iniciada.");
+        await StartSessionAsync(LocalizedText.Get("UnlimitedSessionStarted"));
     }
 
     private async void Start25Button_Click(object sender, RoutedEventArgs e) => await StartTimedSessionAsync(25);
@@ -125,7 +155,7 @@ public partial class MainWindow : Window
     {
         if (!int.TryParse(SessionMinutesInput.Text, NumberStyles.None, CultureInfo.InvariantCulture, out var minutes))
         {
-            MessageBox.Show("Introduce una duración en minutos entre 1 y 1440.", "Duración no válida", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizedText.Get("EnterADurationBetweenAndMinutes"), LocalizedText.Get("InvalidDuration"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -136,12 +166,12 @@ public partial class MainWindow : Window
     {
         if (!BlockStateEvaluator.TryCreateTimedSession(_clock, minutes, out var session, out var error))
         {
-            MessageBox.Show(error, "Duración no válida", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(error, LocalizedText.Get("InvalidDuration"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         _configuration.ManualSession = session;
-        await StartSessionAsync($"Sesión de {minutes} minutos iniciada.");
+        await StartSessionAsync(LocalizedText.Format("MinuteSessionStarted", minutes));
     }
 
     private async Task StartSessionAsync(string activity)
@@ -159,9 +189,9 @@ public partial class MainWindow : Window
         var state = GetState();
         if (confirm && MessageBox.Show(this,
                 state.ScheduledActive
-                    ? "La sesión terminará, pero el bloqueo continuará porque el horario está activo. ¿Continuar?"
-                    : "La sesión terminará y se retirarán las reglas si el horario no está activo. ¿Continuar?",
-                "Terminar sesión", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    ? LocalizedText.Get("TheSessionWillEndButBlockingWill")
+                    : LocalizedText.Get("TheSessionWillEndAndRulesWill"),
+                LocalizedText.Get("EndSession"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -169,7 +199,7 @@ public partial class MainWindow : Window
         _configuration.ManualSession = null;
         _consent.Reset();
         await SaveAsync();
-        AddActivity("Sesión manual terminada.");
+        AddActivity(LocalizedText.Get("ManualSessionEnded"));
         await ApplyDesiredStateAsync(forceHosts: true, stopping: !state.ScheduledActive);
     }
 
@@ -184,7 +214,7 @@ public partial class MainWindow : Window
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = Environment.ProcessPath ?? throw new InvalidOperationException("No se encuentra la ruta de la aplicación."),
+                FileName = Environment.ProcessPath ?? throw new InvalidOperationException(LocalizedText.Get("TheApplicationPathCouldNotBeFound")),
                 UseShellExecute = true,
                 Verb = "runas"
             });
@@ -195,14 +225,14 @@ public partial class MainWindow : Window
         {
             if (!app.ReacquireInstanceAfterElevationCancellation())
             {
-                _configurationError = "No se pudo recuperar la instancia de Cold Ham después de cancelar la elevación.";
+                _configurationError = LocalizedText.Get("CouldNotRecoverTheColdHamInstance");
             }
-            AddActivity("Se canceló el reinicio como administrador.");
+            AddActivity(LocalizedText.Get("RestartAsAdministratorWasCancelled"));
         }
         catch (Exception exception)
         {
             app.ReacquireInstanceAfterElevationCancellation();
-            ShowError("No se pudo reiniciar como administrador.", exception);
+            ShowError(LocalizedText.Get("CouldNotRestartAsAdministrator"), exception);
         }
     }
 
@@ -221,20 +251,20 @@ public partial class MainWindow : Window
     {
         if (!RuleNormalizer.TryNormalizeDomain(WebsiteInput.Text, out var normalized, out var error))
         {
-            MessageBox.Show(TranslateValidation(error), "Sitio web no válido", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(error, LocalizedText.Get("InvalidWebsite"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         if (_websites.Any(item => string.Equals(item.Value, normalized, StringComparison.OrdinalIgnoreCase)))
         {
-            MessageBox.Show("Ese sitio web ya está en la lista.", "Sitio duplicado", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizedText.Get("ThatWebsiteIsAlreadyOnTheList"), LocalizedText.Get("DuplicateWebsite"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         _websites.Add(RuleRow.ForWebsite(normalized));
         WebsiteInput.Clear();
         await RulesChangedAsync();
-        AddActivity($"Sitio añadido: {normalized}");
+        AddActivity(LocalizedText.Format("WebsiteAdded", normalized));
     }
 
     private async void RemoveWebsiteItem_Click(object sender, RoutedEventArgs e)
@@ -245,8 +275,8 @@ public partial class MainWindow : Window
         }
 
         var result = MessageBox.Show(
-            $"¿Eliminar {selected.Value} de la lista?",
-            "Eliminar sitio web",
+            LocalizedText.Format("RemoveFromTheList", selected.Value),
+            LocalizedText.Get("RemoveWebsite"),
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes)
@@ -256,7 +286,7 @@ public partial class MainWindow : Window
 
         _websites.Remove(selected);
         await RulesChangedAsync();
-        AddActivity($"Sitio eliminado: {selected.Value}");
+        AddActivity(LocalizedText.Format("WebsiteRemoved", selected.Value));
     }
 
     private async void AddApplicationButton_Click(object sender, RoutedEventArgs e) => await AddApplicationAsync();
@@ -274,27 +304,27 @@ public partial class MainWindow : Window
     {
         if (!RuleNormalizer.TryNormalizeDomain(AllowedWebsiteInput.Text, out var normalized, out var error))
         {
-            MessageBox.Show(TranslateValidation(error), "Sitio web no válido", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(error, LocalizedText.Get("InvalidWebsite"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         if (_allowedWebsites.Any(item => string.Equals(item.Value, normalized, StringComparison.OrdinalIgnoreCase)))
         {
-            MessageBox.Show("Ese sitio web ya está en la lista de permitidos.", "Sitio duplicado", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizedText.Get("ThatWebsiteIsAlreadyOnTheAllowed"), LocalizedText.Get("DuplicateWebsite"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         try { BrowserPolicyPlan.BuildAllowlist(_allowedWebsites.Select(item => item.Value).Append(normalized)); }
         catch (InvalidDataException exception)
         {
-            MessageBox.Show(exception.Message, "Lista de permitidos completa", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(exception.Message, LocalizedText.Get("AllowedListFull"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         _allowedWebsites.Add(RuleRow.ForWebsite(normalized));
         AllowedWebsiteInput.Clear();
         await RulesChangedAsync();
-        AddActivity($"Sitio permitido añadido: {normalized}");
+        AddActivity(LocalizedText.Format("AllowedWebsiteAdded", normalized));
     }
 
     private async void WebsiteModeChanged(object sender, RoutedEventArgs e)
@@ -302,27 +332,27 @@ public partial class MainWindow : Window
         if (_loading) return;
         var allowOnly = OnlyAllowedWebsitesToggle.IsChecked == true;
         if (allowOnly && MessageBox.Show(this,
-                "Durante una sesión o un horario activo se bloquearán los sitios no permitidos en Chrome y Edge. Una lista vacía bloquea todos los sitios. Otros navegadores y los perfiles personales de Microsoft en Edge quedan fuera de este modo. Reinicia el navegador para cargar o retirar las políticas. ¿Activar este modo?",
-                "Solo sitios permitidos", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                LocalizedText.Get("DuringASessionOrActiveScheduleWebsites"),
+                LocalizedText.Get("AllowedWebsitesOnly"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             OnlyAllowedWebsitesToggle.IsChecked = false;
             return;
         }
         _configuration.WebsiteMode = allowOnly ? WebsiteBlockingMode.AllowListedSites : WebsiteBlockingMode.BlockListedSites;
         await RulesChangedAsync();
-        AddActivity(allowOnly ? "Modo web: solo sitios permitidos en Chrome y Edge." : "Modo web: lista de sitios bloqueados.");
+        AddActivity(allowOnly ? LocalizedText.Get("WebModeAllowedWebsitesOnlyInChrome") : LocalizedText.Get("WebModeBlockedWebsiteList"));
     }
 
     private async void RemoveAllowedWebsiteItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement { DataContext: RuleRow selected }) return;
         if (MessageBox.Show(this,
-                $"¿Eliminar {selected.Value} de los sitios permitidos? Dejará de estar permitido cuando esté activo el modo Solo sitios permitidos.",
-                "Eliminar sitio permitido", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+                LocalizedText.Format("RemoveFromTheAllowedWebsitesItWill", selected.Value),
+                LocalizedText.Get("RemoveAllowedWebsite"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 
         _allowedWebsites.Remove(selected);
         await RulesChangedAsync();
-        AddActivity($"Sitio permitido eliminado: {selected.Value}");
+        AddActivity(LocalizedText.Format("AllowedWebsiteRemoved", selected.Value));
     }
 
     private async void ApplicationInput_KeyDown(object sender, KeyEventArgs e)
@@ -338,7 +368,7 @@ public partial class MainWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "Aplicaciones de Windows (*.exe)|*.exe",
+            Filter = LocalizedText.Get("WindowsApplicationsExeExe"),
             CheckFileExists = true,
             Multiselect = false
         };
@@ -354,20 +384,20 @@ public partial class MainWindow : Window
     {
         if (!RuleNormalizer.TryNormalizeApplication(ApplicationInput.Text, out var normalized, out var error))
         {
-            MessageBox.Show(TranslateValidation(error), "Aplicación no válida", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(error, LocalizedText.Get("InvalidApplication"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         if (_applications.Any(item => string.Equals(item.Value, normalized, StringComparison.OrdinalIgnoreCase)))
         {
-            MessageBox.Show("Esa aplicación ya está en la lista.", "Aplicación duplicada", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizedText.Get("ThatApplicationIsAlreadyOnTheList"), LocalizedText.Get("DuplicateApplication"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         _applications.Add(RuleRow.ForApplication(normalized));
         ApplicationInput.Clear();
         await RulesChangedAsync();
-        AddActivity($"Aplicación añadida: {Path.GetFileName(normalized)}");
+        AddActivity(LocalizedText.Format("ApplicationAdded", Path.GetFileName(normalized)));
     }
 
     private async void RemoveApplicationItem_Click(object sender, RoutedEventArgs e)
@@ -378,8 +408,8 @@ public partial class MainWindow : Window
         }
 
         var result = MessageBox.Show(
-            $"¿Eliminar {selected.DisplayName} de la lista?",
-            "Eliminar aplicación",
+            LocalizedText.Format("RemoveFromTheList", selected.DisplayName),
+            LocalizedText.Get("RemoveApplication"),
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes)
@@ -389,7 +419,7 @@ public partial class MainWindow : Window
 
         _applications.Remove(selected);
         await RulesChangedAsync();
-        AddActivity($"Aplicación eliminada: {selected.DisplayName}");
+        AddActivity(LocalizedText.Format("ApplicationRemoved", selected.DisplayName));
     }
 
     private async void ScheduleControlChanged(object sender, RoutedEventArgs e)
@@ -472,6 +502,7 @@ public partial class MainWindow : Window
     {
         if (_applying || _saving || _loading || (_configurationError is not null && !stopping)) return;
         _applying = true;
+        LanguageSelector.IsEnabled = false;
         MainTabs.IsEnabled = false;
         StartButton.IsEnabled = false;
         StopButton.IsEnabled = false;
@@ -484,10 +515,10 @@ public partial class MainWindow : Window
                 _configuration.ManualSession = null;
                 _consent.Reset();
                 await SaveExpiredSessionAsync();
-                AddActivity("La sesión manual terminó por tiempo.");
-                RaiseNotification("Sesión terminada", state.ScheduledActive
-                    ? "La sesión ha terminado."
-                    : "La sesión ha terminado; el horario puede mantener el bloqueo activo.");
+                AddActivity(LocalizedText.Get("TheManualSessionExpired"));
+                RaiseNotification(LocalizedText.Get("SessionEnded"), state.ScheduledActive
+                    ? LocalizedText.Get("TheSessionHasEnded")
+                    : LocalizedText.Get("TheSessionHasEndedTheScheduleMay"));
                 state = GetState();
             }
 
@@ -518,22 +549,22 @@ public partial class MainWindow : Window
                     if (failures.Count > 0) throw new AggregateException(failures);
                     _appliedWebRules = webKey;
                     _hostsError = null;
-                    AddActivity(allowOnly ? "Políticas de solo permitidos escritas para Chrome y Edge. Reinicia el navegador y comprueba chrome://policy o edge://policy."
+                    AddActivity(allowOnly ? LocalizedText.Get("AllowOnlyPoliciesWrittenForChromeAnd")
                         : webRules.Length > 0
-                        ? $"Se escribieron {webRules.Length} regla(s) web en hosts."
-                        : "Se verificó la retirada de las reglas web de Cold Ham. Reinicia el navegador si usaste Solo sitios permitidos.");
+                        ? LocalizedText.Format("WroteWebRuleSToHosts", webRules.Length)
+                        : LocalizedText.Get("RemovalOfColdHamWebRulesVerified"));
                 }
                 catch (Exception exception)
                 {
                     _hostsError = exception is UnauthorizedAccessException || exception is AggregateException aggregate && aggregate.InnerExceptions.Any(error => error is UnauthorizedAccessException)
-                        ? "No se pudieron aplicar o retirar las reglas web. Si faltan permisos de hosts, reinicia como administrador y pulsa Reintentar. Si las políticas están administradas por tu organización, consulta a su administrador."
-                        : $"No se pudieron aplicar o retirar las reglas web: {exception.Message}";
+                        ? LocalizedText.Get("CouldNotApplyOrRemoveWebRules")
+                        : LocalizedText.Format("WebRulesErrorDetails", exception.Message);
                     ReportOnce(_hostsError);
                 }
             }
 
             _effectiveActive = desired;
-            if (stateChanged) AddActivity(desired ? "Se solicitó activar el bloqueo." : "Se solicitó detener el bloqueo.");
+            if (stateChanged) AddActivity(desired ? LocalizedText.Get("BlockingActivationRequested") : LocalizedText.Get("BlockingDeactivationRequested"));
             _applicationError = null;
             var consentStatus = _consent.Evaluate(desired, _configuration.Applications);
             if (!desired || _configuration.Applications.Count == 0)
@@ -547,15 +578,15 @@ public partial class MainWindow : Window
                 if (consentStatus == ApplicationConsentStatus.NeedsConfirmation)
                 {
                     _applicationsApproved = MessageBox.Show(this,
-                        "Se cerrarán las aplicaciones que coincidan con estas reglas, incluidas las que abras durante este bloqueo:\n\n"
+                        LocalizedText.Get("ApplicationsMatchingTheseRulesWillBeClosed")
                         + string.Join("\n", applications)
-                        + "\n\nGuarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, las webs seguirán su estado indicado y las aplicaciones quedarán pendientes.",
-                        "Confirmar bloqueo de aplicaciones", MessageBoxButton.YesNo, MessageBoxImage.Warning,
+                        + LocalizedText.Get("SaveYourWorkBeforeContinuingAuthorizeThese"),
+                        LocalizedText.Get("ConfirmApplicationBlocking"), MessageBoxButton.YesNo, MessageBoxImage.Warning,
                         MessageBoxResult.No) == MessageBoxResult.Yes;
                     _consent.Decide(applications, _applicationsApproved);
                     if (!_applicationsApproved)
                     {
-                        RaiseNotification("Cierres pendientes", "Cold Ham no cerrará aplicaciones hasta que autorices la sesión.");
+                        RaiseNotification(LocalizedText.Get("ClosuresPending"), LocalizedText.Get("ColdHamWillNotCloseApplicationsUntil"));
                     }
                 }
                 // A scheduled session can end while the confirmation dialog is open.
@@ -570,7 +601,7 @@ public partial class MainWindow : Window
                     try
                     {
                         var sweep = await Task.Run(() => _processBlocker.Sweep(applications));
-                        if (sweep.Terminated > 0) AddActivity($"Se cerraron {sweep.Terminated} aplicación(es) bloqueada(s).");
+                        if (sweep.Terminated > 0) AddActivity(LocalizedText.Format("ClosedBlockedApplicationS", sweep.Terminated));
                         if (sweep.Errors.Count > 0)
                         {
                             _applicationError = string.Join("\n", sweep.Errors.Distinct());
@@ -579,7 +610,7 @@ public partial class MainWindow : Window
                     }
                     catch (Exception exception)
                     {
-                        _applicationError = $"No se pudo comprobar el bloqueo de aplicaciones: {exception.Message}";
+                        _applicationError = LocalizedText.Format("CouldNotCheckApplicationBlocking", exception.Message);
                         ReportOnce(_applicationError);
                     }
                 }
@@ -616,7 +647,7 @@ public partial class MainWindow : Window
         if (!TimeOnly.TryParseExact(StartTimeInput.Text.Trim(), ["H:mm", "HH:mm"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var start)
             || !TimeOnly.TryParseExact(EndTimeInput.Text.Trim(), ["H:mm", "HH:mm"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
         {
-            error = "Introduce las horas en formato de 24 horas HH:mm.";
+            error = LocalizedText.Get("EnterTimesInHourHHMmFormat");
             return false;
         }
 
@@ -631,7 +662,7 @@ public partial class MainWindow : Window
 
         if (ScheduleEnabled.IsChecked == true && days.Count == 0)
         {
-            error = "Selecciona al menos un día para activar el horario.";
+            error = LocalizedText.Get("SelectAtLeastOneDayToEnable");
             return false;
         }
 
@@ -672,7 +703,7 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            _configurationError = $"La sesión ha terminado, pero no se pudo guardar su finalización: {exception.Message}";
+            _configurationError = LocalizedText.Format("TheSessionHasEndedButItsEnd", exception.Message);
             ReportOnce(_configurationError);
         }
     }
@@ -691,7 +722,7 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            _configurationError = $"No se pudo guardar la configuración. Pulsa Reintentar tras resolver el problema: {exception.Message}";
+            _configurationError = LocalizedText.Format("CouldNotSaveTheConfigurationClickRetry", exception.Message);
             ReportOnce(_configurationError);
             return false;
         }
@@ -708,36 +739,36 @@ public partial class MainWindow : Window
         StatusDot.Fill = new SolidColorBrush(hasError || pendingConsent ? Color.FromRgb(181, 71, 8) : _effectiveActive
             ? Color.FromRgb(18, 183, 106)
             : Color.FromRgb(152, 162, 179));
-        StatusTitleText.Text = hasError ? "Bloqueo con incidencias" : pendingConsent ? "Bloqueo pendiente de confirmación"
-            : _effectiveActive ? "Bloqueo activo" : "Bloqueo detenido";
-        StatusText.Text = hasError ? "Revisa el estado de webs y aplicaciones antes de dar el bloqueo por aplicado o retirado." : _effectiveActive
+        StatusTitleText.Text = hasError ? LocalizedText.Get("BlockingHasIssues") : pendingConsent ? LocalizedText.Get("BlockingAwaitsConfirmation")
+            : _effectiveActive ? LocalizedText.Get("BlockingActive") : LocalizedText.Get("BlockingStopped");
+        StatusText.Text = hasError ? LocalizedText.Get("CheckWebsiteAndApplicationStatusBeforeAssuming") : _effectiveActive
             ? scheduled && !state.ManualActive
-                ? "Activado por el horario semanal"
-                : scheduled ? "Activado por una sesión y el horario semanal" : "Activado por una sesión manual"
-            : "Las reglas están preparadas pero no se están aplicando";
+                ? LocalizedText.Get("ActivatedByTheWeeklySchedule")
+                : scheduled ? LocalizedText.Get("ActivatedByASessionAndTheWeekly") : LocalizedText.Get("ActivatedByAManualSession")
+            : LocalizedText.Get("RulesAreReadyButAreNotBeing");
 
         var transition = state.NextScheduleTransition;
         if (state.ManualActive && _configuration.ManualSession?.EndsAtUtc is { } endsAt)
         {
             var remaining = state.Remaining ?? TimeSpan.Zero;
-            var scheduleContinuation = scheduled ? " El horario también está activo." : string.Empty;
-            NextChangeText.Text = $"La sesión termina {FormatRemaining(remaining)} ({FormatTransition(endsAt.LocalDateTime)}).{scheduleContinuation}";
+            var scheduleContinuation = scheduled ? LocalizedText.Get("TheScheduleIsAlsoActive") : string.Empty;
+            NextChangeText.Text = LocalizedText.Format("SessionEnds", FormatRemaining(remaining), FormatTransition(endsAt.LocalDateTime), scheduleContinuation);
         }
         else if (state.ManualActive)
         {
-            NextChangeText.Text = "La sesión manual no tiene hora de finalización.";
+            NextChangeText.Text = LocalizedText.Get("TheManualSessionHasNoEndTime");
         }
         else if (transition is not null)
         {
             NextChangeText.Text = scheduled
-                ? $"Finaliza {FormatTransition(transition.Value.LocalDateTime)}."
-                : $"Próximo bloqueo {FormatTransition(transition.Value.LocalDateTime)}.";
+                ? LocalizedText.Format("Ends", FormatTransition(transition.Value.LocalDateTime))
+                : LocalizedText.Format("NextBlock", FormatTransition(transition.Value.LocalDateTime));
         }
         else
         {
             NextChangeText.Text = _configuration.Schedule.Enabled
-                ? "Revisa los días y horas de la programación."
-                : "No hay ningún horario activo.";
+                ? LocalizedText.Get("CheckTheScheduledDaysAndTimes")
+                : LocalizedText.Get("NoScheduleIsActive");
         }
 
         StartButton.IsEnabled = !_applying && !_saving && !_loadFailed && !state.ManualActive;
@@ -748,41 +779,43 @@ public partial class MainWindow : Window
         EndSessionButton.IsEnabled = !_applying && !_saving && state.ManualActive;
         StopButton.IsEnabled = !_applying && !_saving && (state.ManualActive || _configuration.Schedule.Enabled || _effectiveActive || _hostsError is not null || _loadFailed);
         MainTabs.IsEnabled = !_applying && !_saving && !_loadFailed;
+        LanguageSelector.IsEnabled = !_loading && !_applying && !_saving && !_loadFailed;
         AdminBanner.IsEnabled = !_applying && !_saving;
         RecoveryText.Text = string.Join("\n", new[] { _configurationError, _hostsError, _applicationError, _recoveryMessage,
-            pendingConsent ? "Cierres de aplicaciones sin autorizar. Pulsa Reintentar cuando hayas guardado tu trabajo." : null }
+            pendingConsent ? LocalizedText.Get("ApplicationClosuresAreNotAuthorizedClickRetry") : null }
             .Where(message => message is not null));
         AdminBanner.Visibility = RecoveryText.Text.Length > 0
             ? Visibility.Visible
             : Visibility.Collapsed;
-        EnforcementText.Text = "Webs: " + (_hostsError is not null ? "estado sin confirmar; pueden quedar reglas activas"
-            : _appliedWebRules is null ? "sin comprobar" : _appliedWebRules.StartsWith("allow\n", StringComparison.Ordinal) ? "solo permitidos: políticas escritas; reinicia Chrome/Edge"
-            : _appliedWebRules.Length > 0 ? "reglas escritas en hosts" : "sin reglas activas; reinicia el navegador si usaste Solo permitidos")
-            + " · Aplicaciones: " + (_configurationError is not null ? "vigilancia suspendida"
-                : _applicationError is not null ? "error de comprobación"
-                : pendingConsent ? "pendientes de autorización" : _effectiveActive && _applicationsApproved && _applications.Count > 0 ? "vigilando" : "sin vigilancia");
+        EnforcementText.Text = LocalizedText.Get("WebsitesStatusPrefix") + (_hostsError is not null ? LocalizedText.Get("UnconfirmedStatusRulesMayStillBeActive")
+            : _appliedWebRules is null ? LocalizedText.Get("NotChecked") : _appliedWebRules.StartsWith("allow\n", StringComparison.Ordinal) ? LocalizedText.Get("AllowedOnlyPoliciesWrittenRestartChromeEdge")
+            : _appliedWebRules.Length > 0 ? LocalizedText.Get("RulesWrittenToHosts") : LocalizedText.Get("NoActiveRulesRestartTheBrowserIf"))
+            + LocalizedText.Get("ApplicationsStatusPrefix") + (_configurationError is not null ? LocalizedText.Get("MonitoringSuspended")
+                : _applicationError is not null ? LocalizedText.Get("CheckFailed")
+                : pendingConsent ? LocalizedText.Get("AwaitingAuthorization") : _effectiveActive && _applicationsApproved && _applications.Count > 0 ? LocalizedText.Get("MonitoringDetail") : LocalizedText.Get("NotMonitoring"));
 
-        var websiteLabel = _websites.Count == 1 ? "1 sitio web" : $"{_websites.Count} sitios web";
-        var applicationLabel = _applications.Count == 1 ? "1 aplicación" : $"{_applications.Count} aplicaciones";
+        var websiteLabel = _websites.Count == 1 ? LocalizedText.Get("WebsiteCountSingular") : LocalizedText.Format("WebsiteCountPlural", _websites.Count);
+        var applicationLabel = _applications.Count == 1 ? LocalizedText.Get("ApplicationCountSingular") : LocalizedText.Format("ApplicationCountPlural", _applications.Count);
         SummaryText.Text = _configuration.WebsiteMode == WebsiteBlockingMode.AllowListedSites
-            ? $"Modo Solo sitios permitidos (Chrome y Edge): {_allowedWebsites.Count} sitios permitidos. {applicationLabel} en la lista de bloqueo."
-            : $"{websiteLabel} y {applicationLabel} en la lista de bloqueo.";
-        WebsiteCountText.Text = _websites.Count == 1 ? "1 regla" : $"{_websites.Count} reglas";
-        AllowedWebsiteCountText.Text = _allowedWebsites.Count == 1 ? "1 sitio" : $"{_allowedWebsites.Count} sitios";
-        ApplicationCountText.Text = _applications.Count == 1 ? "1 regla" : $"{_applications.Count} reglas";
+            ? LocalizedText.Format("AllowedWebsitesOnlyModeChromeAndEdge", _allowedWebsites.Count, applicationLabel)
+            : LocalizedText.Format("AndOnTheBlockList", websiteLabel, applicationLabel);
+        WebsiteCountText.Text = _websites.Count == 1 ? LocalizedText.Get("Rule") : LocalizedText.Format("Rules", _websites.Count);
+        AllowedWebsiteCountText.Text = _allowedWebsites.Count == 1 ? LocalizedText.Get("AllowedWebsiteCountSingular") : LocalizedText.Format("AllowedWebsiteCountPlural", _allowedWebsites.Count);
+        ApplicationCountText.Text = _applications.Count == 1 ? LocalizedText.Get("Rule") : LocalizedText.Format("Rules", _applications.Count);
         WebsiteEmptyText.Visibility = _websites.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         AllowedWebsiteEmptyText.Visibility = _allowedWebsites.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ApplicationEmptyText.Visibility = _applications.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         UpdateRuleStatuses();
         UpdateScheduleSummary();
+        UpdateActivityHeader();
         SessionSummaryText.Text = state.ManualActive
             ? _configuration.ManualSession?.EndsAtUtc is { } end
-                ? $"Sesión en curso: {FormatRemaining(state.Remaining ?? TimeSpan.Zero)} restantes; termina {FormatTransition(end.LocalDateTime)}."
-                : "Sesión manual en curso sin hora de finalización."
+                ? LocalizedText.Format("SessionInProgressEnds", FormatRemaining(state.Remaining ?? TimeSpan.Zero), FormatTransition(end.LocalDateTime))
+                : LocalizedText.Get("ManualSessionInProgressWithNoEnd")
             : scheduled
-                ? "No hay sesión manual; el horario mantiene el bloqueo activo."
-                : "No hay una sesión manual en curso.";
+                ? LocalizedText.Get("NoManualSessionTheScheduleKeepsBlocking")
+                : LocalizedText.Get("NoManualSessionIsInProgress");
         TrayStatus = StatusTitleText.Text + " · " + NextChangeText.Text;
         BlockStateChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -796,39 +829,39 @@ public partial class MainWindow : Window
         {
             if (_hostsError is not null || _configurationError is not null)
             {
-                website.SetStatus("Sin confirmar", "#B54708");
+                website.SetStatus(LocalizedText.Get("Unconfirmed"), "#B54708");
             }
             else if (allowOnly)
             {
-                website.SetStatus("No se usa en este modo", "#667085");
+                website.SetStatus(LocalizedText.Get("NotUsedInThisMode"), "#667085");
             }
             else if (!_effectiveActive)
             {
-                website.SetStatus("Preparado", "#667085");
+                website.SetStatus(LocalizedText.Get("Ready"), "#667085");
             }
             else if (_appliedWebRules == effectiveKey)
             {
-                website.SetStatus("En hosts", "#067647");
+                website.SetStatus(LocalizedText.Get("InHosts"), "#067647");
             }
             else
             {
-                website.SetStatus("Pendiente", "#B54708");
+                website.SetStatus(LocalizedText.Get("Pending"), "#B54708");
             }
         }
 
         foreach (var website in _allowedWebsites)
         {
-            var status = _hostsError is not null || _configurationError is not null ? "Sin confirmar"
-                : !allowOnly ? "Modo desactivado" : !_effectiveActive ? "Preparado"
-                : _appliedWebRules == "allow\n" + RuleKey(_configuration.AllowedWebsites) ? "En políticas" : "Pendiente";
-            website.SetStatus(status, status is "Sin confirmar" or "Pendiente" ? "#B54708" : "#667085");
+            var status = _hostsError is not null || _configurationError is not null ? LocalizedText.Get("Unconfirmed")
+                : !allowOnly ? LocalizedText.Get("ModeDisabled") : !_effectiveActive ? LocalizedText.Get("Ready")
+                : _appliedWebRules == "allow\n" + RuleKey(_configuration.AllowedWebsites) ? LocalizedText.Get("InPolicies") : LocalizedText.Get("Pending");
+            website.SetStatus(status, status == LocalizedText.Get("Unconfirmed") || status == LocalizedText.Get("Pending") ? "#B54708" : "#667085");
         }
 
         foreach (var application in _applications)
         {
-            var status = _configurationError is not null ? "Sin vigilancia" : !_effectiveActive ? "Preparado" : !_applicationsApproved ? "Sin autorizar"
-                : _applicationError is not null ? "Revisar" : "Vigilando";
-            application.SetStatus(status, status == "Vigilando" ? "#067647" : "#667085");
+            var status = _configurationError is not null ? LocalizedText.Get("NotMonitoringStatus") : !_effectiveActive ? LocalizedText.Get("Ready") : !_applicationsApproved ? LocalizedText.Get("NotAuthorized")
+                : _applicationError is not null ? LocalizedText.Get("Review") : LocalizedText.Get("Monitoring");
+            application.SetStatus(status, status == LocalizedText.Get("Monitoring") ? "#067647" : "#667085");
         }
     }
 
@@ -836,7 +869,7 @@ public partial class MainWindow : Window
     {
         if (!TryReadSchedule(out var schedule, out _))
         {
-            ScheduleSummaryText.Text = "La programación contiene datos pendientes de corregir.";
+            ScheduleSummaryText.Text = LocalizedText.Get("TheScheduleContainsValuesThatNeedCorrecting");
             OverviewScheduleText.Text = ScheduleSummaryText.Text;
             return;
         }
@@ -850,7 +883,7 @@ public partial class MainWindow : Window
     {
         if (!schedule.Enabled)
         {
-            return "El horario está desactivado.";
+            return LocalizedText.Get("TheScheduleIsDisabled");
         }
 
         var weekdays = new[]
@@ -861,22 +894,22 @@ public partial class MainWindow : Window
         string daysText;
         if (schedule.Days.Count == 7)
         {
-            daysText = "Todos los días";
+            daysText = LocalizedText.Get("EveryDay");
         }
         else if (schedule.Days.Count == 5 && weekdays.All(schedule.Days.Contains))
         {
-            daysText = "De lunes a viernes";
+            daysText = LocalizedText.Get("MondayToFriday");
         }
         else
         {
             daysText = string.Join(", ", schedule.Days
                 .OrderBy(DayOrder)
-                .Select(day => SpanishCulture.DateTimeFormat.GetAbbreviatedDayName(day).TrimEnd('.')));
+                .Select(day => LocalizedText.Culture.DateTimeFormat.GetAbbreviatedDayName(day).TrimEnd('.')));
         }
 
         return schedule.Start == schedule.End
-            ? $"{daysText}, durante todo el día."
-            : $"{daysText}, de {schedule.Start:HH\\:mm} a {schedule.End:HH\\:mm}.";
+            ? LocalizedText.Format("AllDay", daysText)
+            : LocalizedText.Format("ScheduleTimeRange", daysText, schedule.Start, schedule.End);
     }
 
     private static int DayOrder(DayOfWeek day) => day == DayOfWeek.Sunday ? 7 : (int)day;
@@ -885,23 +918,23 @@ public partial class MainWindow : Window
     {
         if (transition.Date == DateTime.Today)
         {
-            return $"hoy a las {transition:HH:mm}";
+            return LocalizedText.Format("TodayAtTime", transition);
         }
 
         if (transition.Date == DateTime.Today.AddDays(1))
         {
-            return $"mañana a las {transition:HH:mm}";
+            return LocalizedText.Format("TomorrowAtTime", transition);
         }
 
-        return $"el {transition.ToString("dddd", SpanishCulture)} a las {transition:HH:mm}";
+        return LocalizedText.Format("WeekdayAtTime", transition.ToString("dddd", LocalizedText.Culture), transition);
     }
 
     private static string FormatRemaining(TimeSpan remaining)
     {
         var rounded = TimeSpan.FromSeconds(Math.Ceiling(Math.Max(0, remaining.TotalSeconds)));
         return rounded.TotalHours >= 1
-            ? $"en {(int)rounded.TotalHours}:{rounded.Minutes:D2}:{rounded.Seconds:D2}"
-            : $"en {rounded.Minutes:D2}:{rounded.Seconds:D2}";
+            ? LocalizedText.Format("RemainingHours", (int)rounded.TotalHours, rounded.Minutes, rounded.Seconds)
+            : LocalizedText.Format("RemainingMinutes", rounded.Minutes, rounded.Seconds);
     }
 
     private void AddActivity(string message)
@@ -912,8 +945,11 @@ public partial class MainWindow : Window
             _activity.RemoveAt(_activity.Count - 1);
         }
 
-        ActivityHeaderText.Text = _activity.Count == 1 ? "Actividad · 1 evento" : $"Actividad · {_activity.Count} eventos";
+        UpdateActivityHeader();
     }
+
+    private void UpdateActivityHeader() =>
+        ActivityHeaderText.Text = _activity.Count == 1 ? LocalizedText.Get("ActivityEvent") : LocalizedText.Format("ActivityEvents", _activity.Count);
 
     private void ReportOnce(string message)
     {
@@ -921,7 +957,7 @@ public partial class MainWindow : Window
         {
             _lastError = message;
             AddActivity(message);
-            RaiseNotification("Cold Ham necesita revisión", message);
+            RaiseNotification(LocalizedText.Get("ColdHamNeedsAttention"), message);
         }
     }
 
@@ -932,25 +968,6 @@ public partial class MainWindow : Window
     {
         AddActivity($"{heading} {exception.Message}");
         MessageBox.Show($"{heading}\n\n{exception.Message}", "Cold Ham", MessageBoxButton.OK, MessageBoxImage.Error);
-    }
-
-    private static string TranslateValidation(string message)
-    {
-        if (message.Contains("wildcard", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Los comodines no son compatibles con el bloqueo mediante el archivo hosts.";
-        }
-        if (message.Contains("protected", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Ese proceso pertenece al sistema o a Cold Ham y no puede bloquearse.";
-        }
-
-        if (message.Contains("executable", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Introduce el nombre de un ejecutable o selecciona un archivo .exe válido.";
-        }
-
-        return "El valor introducido no es válido.";
     }
 
     public void ShowFromTray()
@@ -973,9 +990,9 @@ public partial class MainWindow : Window
         var state = GetState();
         if (MessageBox.Show(this,
                 state.DesiredActive || _hostsError is not null
-                    ? "Al salir se terminará la sesión y se retirarán las reglas web. El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?"
-                    : "El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?",
-                "Salir de Cold Ham", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    ? LocalizedText.Get("ExitingWillEndTheSessionAndRemove")
+                    : LocalizedText.Get("TheScheduleWillBeSavedButWill"),
+                LocalizedText.Get("ExitColdHam"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -995,8 +1012,8 @@ public partial class MainWindow : Window
         }
 
         if (!saved && MessageBox.Show(this,
-            "Las reglas se han retirado, pero no se pudo guardar el fin de la sesión. ¿Salir de todos modos?",
-            "Configuración sin guardar", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            LocalizedText.Get("RulesHaveBeenRemovedButTheEnd"),
+            LocalizedText.Get("UnsavedConfiguration"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
         {
             _suppressEnforcementForExit = false;
             _timer.Start();
@@ -1010,8 +1027,8 @@ public partial class MainWindow : Window
     private async Task StopAllAsync(bool confirm)
     {
         if (confirm && MessageBox.Show(this,
-            "Se terminará la sesión y se desactivará el horario. ¿Quieres continuar?",
-            "Detener todo", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            LocalizedText.Get("TheSessionWillEndAndTheSchedule"),
+            LocalizedText.Get("StopAll"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
             return;
         }
@@ -1021,7 +1038,7 @@ public partial class MainWindow : Window
         ScheduleEnabled.IsChecked = false;
         _consent.Reset();
         await SaveAsync();
-        AddActivity("Se detuvo la sesión y se desactivó el horario.");
+        AddActivity(LocalizedText.Get("TheSessionWasStoppedAndTheSchedule"));
         await ApplyDesiredStateAsync(forceHosts: true, stopping: true);
     }
 
@@ -1042,11 +1059,11 @@ public partial class MainWindow : Window
         {
             _hideExplanationShown = true;
             MessageBox.Show(this,
-                "Cold Ham seguirá funcionando desde el icono de la bandeja. Ábrelo desde allí para terminar una sesión o salir.",
-                "Cold Ham sigue activo", MessageBoxButton.OK, MessageBoxImage.Information);
+                LocalizedText.Get("ColdHamWillKeepRunningFromThe"),
+                LocalizedText.Get("ColdHamIsStillRunning"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         Hide();
-        AddActivity("La ventana se ocultó en la bandeja del sistema.");
+        AddActivity(LocalizedText.Get("TheWindowWasHiddenInTheSystem"));
     }
 
 }
@@ -1059,7 +1076,7 @@ public sealed class TrayNotificationEventArgs(string title, string message) : Ev
 
 public sealed class RuleRow : INotifyPropertyChanged
 {
-    private string _status = "Preparado";
+    private string _status = LocalizedText.Get("Ready");
     private string _statusBrush = "#667085";
 
     private RuleRow(string value, string displayName)

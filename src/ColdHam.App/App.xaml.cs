@@ -1,3 +1,4 @@
+using ColdHam.Core;
 using System.IO.Pipes;
 using System.IO;
 using System.Security.Principal;
@@ -20,6 +21,7 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        UpdateLanguageResources();
         _pipeName = BuildPipeName();
         if (!TryAcquireSingleInstance())
         {
@@ -37,7 +39,7 @@ public partial class App : Application
         catch (Exception exception)
         {
             MessageBox.Show(_mainWindow,
-                $"No se pudo crear el icono de bandeja. Cerrar la ventana iniciará la salida segura.\n\n{exception.Message}",
+                LocalizedText.Format("CouldNotCreateTheTrayIconClosing", exception.Message),
                 "Cold Ham", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         _activationCancellation = new CancellationTokenSource();
@@ -52,6 +54,14 @@ public partial class App : Application
         _instanceMutex?.Dispose();
         _instanceMutex = null;
         Shutdown();
+    }
+
+    internal void UpdateLanguageResources()
+    {
+        foreach (var key in LocalizedText.Keys)
+        {
+            Resources[key] = LocalizedText.Get(key);
+        }
     }
 
     internal void ReleaseInstanceForElevation()

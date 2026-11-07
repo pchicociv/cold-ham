@@ -110,7 +110,7 @@ public sealed class BrowserPolicyManager
         }
         catch (Exception exception) when (exception is JsonException or InvalidDataException)
         {
-            throw new InvalidDataException($"El registro de recuperación de políticas no es válido: {_journalPath}. No se han modificado las políticas del navegador.", exception);
+            throw new InvalidDataException(LocalizedText.Format("ThePolicyRecoveryJournalIsInvalidBrowser", _journalPath), exception);
         }
     }
 
@@ -128,7 +128,7 @@ public sealed class BrowserPolicyManager
     }
 
     private static InvalidOperationException Conflict(string path) => new(
-        $"Hay políticas de navegador ajenas a Cold Ham o modificadas por otro programa en {path}. No se sobrescribirán. Revisa chrome://policy y edge://policy o consulta al administrador del equipo.");
+        LocalizedText.Format("BrowserPoliciesNotOwnedByColdHam", path));
 }
 
 public interface IBrowserPolicyRegistry
@@ -162,7 +162,7 @@ internal sealed class BrowserPolicyRegistry : IBrowserPolicyRegistry
     {
         using var key = Registry.CurrentUser.CreateSubKey(path, writable: true);
         if (key.GetValueNames().Contains(name, StringComparer.OrdinalIgnoreCase))
-            throw new IOException("Una política ha cambiado mientras se aplicaba el bloqueo. Pulsa Reintentar.");
+            throw new IOException(LocalizedText.Get("PolicyChangedDuringApply"));
         key.SetValue(name, value, RegistryValueKind.String);
         key.Flush();
     }
@@ -172,7 +172,7 @@ internal sealed class BrowserPolicyRegistry : IBrowserPolicyRegistry
         using var key = Registry.CurrentUser.OpenSubKey(path, writable: true);
         if (key is null || !key.GetValueNames().Contains(name, StringComparer.OrdinalIgnoreCase)) return;
         if (key.GetValueKind(name) != RegistryValueKind.String || !Equals(key.GetValue(name), expected))
-            throw new IOException("Una política ha cambiado mientras se retiraba el bloqueo. Se ha conservado; revisa las políticas del navegador.");
+            throw new IOException(LocalizedText.Get("PolicyChangedDuringRemoval"));
         key.DeleteValue(name, throwOnMissingValue: false);
         key.Flush();
     }

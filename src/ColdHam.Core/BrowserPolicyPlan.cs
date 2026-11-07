@@ -13,7 +13,7 @@ public static class BrowserPolicyPlan
                 .SelectMany(domain => new[] { $"http://.{domain}", $"https://.{domain}" }))
             .ToArray();
         if (patterns.Length > MaximumEntries)
-            throw new InvalidDataException("La lista supera el límite de 1000 patrones de Chrome y Edge (hasta 249 dominios con variante www). Reduce los sitios permitidos.");
+            throw new InvalidDataException(LocalizedText.Get("TheListExceedsTheChromeAndEdge"));
         return patterns;
     }
 }

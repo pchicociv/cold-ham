@@ -89,7 +89,7 @@ public sealed class HostsFileManager
     {
         if (bytes.AsSpan().StartsWith(new byte[] { 0xFF, 0xFE, 0, 0 }) || bytes.AsSpan().StartsWith(new byte[] { 0, 0, 0xFE, 0xFF }))
         {
-            throw new InvalidDataException("El archivo hosts usa UTF-32. Conviértelo a UTF-8 antes de aplicar reglas.");
+            throw new InvalidDataException(LocalizedText.Get("TheHostsFileUsesUTFConvertIt"));
         }
         if (bytes.AsSpan().StartsWith(new byte[] { 0xFF, 0xFE })) return (new UnicodeEncoding(false, false, true), 2);
         if (bytes.AsSpan().StartsWith(new byte[] { 0xFE, 0xFF })) return (new UnicodeEncoding(true, false, true), 2);
@@ -153,7 +153,7 @@ public sealed class HostsFileManager
     }
 
     private static InvalidDataException InvalidMarkers() => new(
-        "La sección de Cold Ham en hosts tiene marcadores incompletos, duplicados o ambiguos. Revisa # Cold Ham BEGIN y # Cold Ham END; no se ha modificado el archivo.");
+        LocalizedText.Get("TheColdHamSectionInHostsHas"));
 
     private static void FlushDnsCache()
     {

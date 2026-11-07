@@ -22,13 +22,13 @@ public static partial class RuleNormalizer
 
         if (value.Length == 0 || value.Any(char.IsControl))
         {
-            error = "Enter a domain, for example reddit.com.";
+            error = LocalizedText.Get("EnterADomainForExampleRedditCom");
             return false;
         }
 
         if (value.Contains('*'))
         {
-            error = "Wildcards are not supported by Windows hosts-file blocking.";
+            error = LocalizedText.Get("WildcardsAreNotSupportedByWindowsHosts");
             return false;
         }
 
@@ -39,14 +39,14 @@ public static partial class RuleNormalizer
 
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || string.IsNullOrWhiteSpace(uri.Host))
         {
-            error = "The website address is not valid.";
+            error = LocalizedText.Get("TheWebsiteAddressIsNotValid");
             return false;
         }
 
         var host = uri.Host.TrimEnd('.');
         if (IPAddress.TryParse(host, out _))
         {
-            error = "Enter a domain name rather than an IP address.";
+            error = LocalizedText.Get("EnterADomainNameRatherThanAn");
             return false;
         }
 
@@ -56,13 +56,13 @@ public static partial class RuleNormalizer
         }
         catch (ArgumentException)
         {
-            error = "The domain contains unsupported characters.";
+            error = LocalizedText.Get("TheDomainContainsUnsupportedCharacters");
             return false;
         }
 
         if (host.Length > 253 || !DomainRegex().IsMatch(host))
         {
-            error = "The domain name is not valid.";
+            error = LocalizedText.Get("TheDomainNameIsNotValid");
             return false;
         }
 
@@ -78,13 +78,13 @@ public static partial class RuleNormalizer
 
         if (value.IndexOfAny(['*', '?', '<', '>', '|']) >= 0 || value.Any(char.IsControl))
         {
-            error = "The executable path is not valid.";
+            error = LocalizedText.Get("TheExecutablePathIsNotValid");
             return false;
         }
 
         if (value.Length == 0)
         {
-            error = "Enter an executable name or choose an .exe file.";
+            error = LocalizedText.Get("EnterAnExecutableNameOrChooseAn");
             return false;
         }
 
@@ -101,20 +101,20 @@ public static partial class RuleNormalizer
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            error = "The executable path is not valid.";
+            error = LocalizedText.Get("TheExecutablePathIsNotValid");
             return false;
         }
 
         if (!value.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
         {
-            error = "Only Windows .exe applications can be blocked.";
+            error = LocalizedText.Get("OnlyWindowsExeApplicationsCanBeBlocked");
             return false;
         }
 
         var fileName = Path.GetFileName(value);
         if (ProtectedExecutables.Contains(fileName))
         {
-            error = $"{fileName} is protected and cannot be added.";
+            error = LocalizedText.Format("IsProtectedAndCannotBeAdded", fileName);
             return false;
         }
 

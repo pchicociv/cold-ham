@@ -1,0 +1,711 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="CouldNotCreateTheTrayIconClosing" xml:space="preserve">
+    <value>No se pudo crear el icono de bandeja. Cerrar la ventana iniciará la salida segura.
+
+{0}</value>
+  </data>
+  <data name="ConfigurationLoadedFrom" xml:space="preserve">
+    <value>Configuración cargada desde {0}</value>
+  </data>
+  <data name="CouldNotLoadTheConfigurationCheckThe" xml:space="preserve">
+    <value>No se pudo cargar la configuración. Revisa el archivo y reinicia Cold Ham. </value>
+  </data>
+  <data name="CouldNotLoadTheConfiguration" xml:space="preserve">
+    <value>No se pudo cargar la configuración.</value>
+  </data>
+  <data name="UnlimitedSessionStarted" xml:space="preserve">
+    <value>Sesión sin límite iniciada.</value>
+  </data>
+  <data name="EnterADurationBetweenAndMinutes" xml:space="preserve">
+    <value>Introduce una duración en minutos entre 1 y 1440.</value>
+  </data>
+  <data name="InvalidDuration" xml:space="preserve">
+    <value>Duración no válida</value>
+  </data>
+  <data name="MinuteSessionStarted" xml:space="preserve">
+    <value>Sesión de {0} minutos iniciada.</value>
+  </data>
+  <data name="TheSessionWillEndButBlockingWill" xml:space="preserve">
+    <value>La sesión terminará, pero el bloqueo continuará porque el horario está activo. ¿Continuar?</value>
+  </data>
+  <data name="TheSessionWillEndAndRulesWill" xml:space="preserve">
+    <value>La sesión terminará y se retirarán las reglas si el horario no está activo. ¿Continuar?</value>
+  </data>
+  <data name="EndSession" xml:space="preserve">
+    <value>Terminar sesión</value>
+  </data>
+  <data name="ManualSessionEnded" xml:space="preserve">
+    <value>Sesión manual terminada.</value>
+  </data>
+  <data name="TheApplicationPathCouldNotBeFound" xml:space="preserve">
+    <value>No se encuentra la ruta de la aplicación.</value>
+  </data>
+  <data name="CouldNotRecoverTheColdHamInstance" xml:space="preserve">
+    <value>No se pudo recuperar la instancia de Cold Ham después de cancelar la elevación.</value>
+  </data>
+  <data name="RestartAsAdministratorWasCancelled" xml:space="preserve">
+    <value>Se canceló el reinicio como administrador.</value>
+  </data>
+  <data name="CouldNotRestartAsAdministrator" xml:space="preserve">
+    <value>No se pudo reiniciar como administrador.</value>
+  </data>
+  <data name="InvalidWebsite" xml:space="preserve">
+    <value>Sitio web no válido</value>
+  </data>
+  <data name="ThatWebsiteIsAlreadyOnTheList" xml:space="preserve">
+    <value>Ese sitio web ya está en la lista.</value>
+  </data>
+  <data name="DuplicateWebsite" xml:space="preserve">
+    <value>Sitio duplicado</value>
+  </data>
+  <data name="WebsiteAdded" xml:space="preserve">
+    <value>Sitio añadido: {0}</value>
+  </data>
+  <data name="RemoveFromTheList" xml:space="preserve">
+    <value>¿Eliminar {0} de la lista?</value>
+  </data>
+  <data name="RemoveWebsite" xml:space="preserve">
+    <value>Eliminar sitio web</value>
+  </data>
+  <data name="WebsiteRemoved" xml:space="preserve">
+    <value>Sitio eliminado: {0}</value>
+  </data>
+  <data name="ThatWebsiteIsAlreadyOnTheAllowed" xml:space="preserve">
+    <value>Ese sitio web ya está en la lista de permitidos.</value>
+  </data>
+  <data name="AllowedListFull" xml:space="preserve">
+    <value>Lista de permitidos completa</value>
+  </data>
+  <data name="AllowedWebsiteAdded" xml:space="preserve">
+    <value>Sitio permitido añadido: {0}</value>
+  </data>
+  <data name="DuringASessionOrActiveScheduleWebsites" xml:space="preserve">
+    <value>Durante una sesión o un horario activo se bloquearán los sitios no permitidos en Chrome y Edge. Una lista vacía bloquea todos los sitios. Otros navegadores y los perfiles personales de Microsoft en Edge quedan fuera de este modo. Reinicia el navegador para cargar o retirar las políticas. ¿Activar este modo?</value>
+  </data>
+  <data name="AllowedWebsitesOnly" xml:space="preserve">
+    <value>Solo sitios permitidos</value>
+  </data>
+  <data name="WebModeAllowedWebsitesOnlyInChrome" xml:space="preserve">
+    <value>Modo web: solo sitios permitidos en Chrome y Edge.</value>
+  </data>
+  <data name="WebModeBlockedWebsiteList" xml:space="preserve">
+    <value>Modo web: lista de sitios bloqueados.</value>
+  </data>
+  <data name="RemoveFromTheAllowedWebsitesItWill" xml:space="preserve">
+    <value>¿Eliminar {0} de los sitios permitidos? Dejará de estar permitido cuando esté activo el modo Solo sitios permitidos.</value>
+  </data>
+  <data name="RemoveAllowedWebsite" xml:space="preserve">
+    <value>Eliminar sitio permitido</value>
+  </data>
+  <data name="AllowedWebsiteRemoved" xml:space="preserve">
+    <value>Sitio permitido eliminado: {0}</value>
+  </data>
+  <data name="WindowsApplicationsExeExe" xml:space="preserve">
+    <value>Aplicaciones de Windows (*.exe)|*.exe</value>
+  </data>
+  <data name="InvalidApplication" xml:space="preserve">
+    <value>Aplicación no válida</value>
+  </data>
+  <data name="ThatApplicationIsAlreadyOnTheList" xml:space="preserve">
+    <value>Esa aplicación ya está en la lista.</value>
+  </data>
+  <data name="DuplicateApplication" xml:space="preserve">
+    <value>Aplicación duplicada</value>
+  </data>
+  <data name="ApplicationAdded" xml:space="preserve">
+    <value>Aplicación añadida: {0}</value>
+  </data>
+  <data name="RemoveApplication" xml:space="preserve">
+    <value>Eliminar aplicación</value>
+  </data>
+  <data name="ApplicationRemoved" xml:space="preserve">
+    <value>Aplicación eliminada: {0}</value>
+  </data>
+  <data name="TheManualSessionExpired" xml:space="preserve">
+    <value>La sesión manual terminó por tiempo.</value>
+  </data>
+  <data name="SessionEnded" xml:space="preserve">
+    <value>Sesión terminada</value>
+  </data>
+  <data name="TheSessionHasEnded" xml:space="preserve">
+    <value>La sesión ha terminado.</value>
+  </data>
+  <data name="TheSessionHasEndedTheScheduleMay" xml:space="preserve">
+    <value>La sesión ha terminado; el horario puede mantener el bloqueo activo.</value>
+  </data>
+  <data name="AllowOnlyPoliciesWrittenForChromeAnd" xml:space="preserve">
+    <value>Políticas de solo permitidos escritas para Chrome y Edge. Reinicia el navegador y comprueba chrome://policy o edge://policy.</value>
+  </data>
+  <data name="WroteWebRuleSToHosts" xml:space="preserve">
+    <value>Se escribieron {0} regla(s) web en hosts.</value>
+  </data>
+  <data name="RemovalOfColdHamWebRulesVerified" xml:space="preserve">
+    <value>Se verificó la retirada de las reglas web de Cold Ham. Reinicia el navegador si usaste Solo sitios permitidos.</value>
+  </data>
+  <data name="CouldNotApplyOrRemoveWebRules" xml:space="preserve">
+    <value>No se pudieron aplicar o retirar las reglas web. Si faltan permisos de hosts, reinicia como administrador y pulsa Reintentar. Si las políticas están administradas por tu organización, consulta a su administrador.</value>
+  </data>
+  <data name="WebRulesErrorDetails" xml:space="preserve">
+    <value>No se pudieron aplicar o retirar las reglas web: {0}</value>
+  </data>
+  <data name="BlockingActivationRequested" xml:space="preserve">
+    <value>Se solicitó activar el bloqueo.</value>
+  </data>
+  <data name="BlockingDeactivationRequested" xml:space="preserve">
+    <value>Se solicitó detener el bloqueo.</value>
+  </data>
+  <data name="ApplicationsMatchingTheseRulesWillBeClosed" xml:space="preserve">
+    <value>Se cerrarán las aplicaciones que coincidan con estas reglas, incluidas las que abras durante este bloqueo:
+
+</value>
+  </data>
+  <data name="SaveYourWorkBeforeContinuingAuthorizeThese" xml:space="preserve">
+    <value>
+
+Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, las webs seguirán su estado indicado y las aplicaciones quedarán pendientes.</value>
+  </data>
+  <data name="ConfirmApplicationBlocking" xml:space="preserve">
+    <value>Confirmar bloqueo de aplicaciones</value>
+  </data>
+  <data name="ClosuresPending" xml:space="preserve">
+    <value>Cierres pendientes</value>
+  </data>
+  <data name="ColdHamWillNotCloseApplicationsUntil" xml:space="preserve">
+    <value>Cold Ham no cerrará aplicaciones hasta que autorices la sesión.</value>
+  </data>
+  <data name="ClosedBlockedApplicationS" xml:space="preserve">
+    <value>Se cerraron {0} aplicación(es) bloqueada(s).</value>
+  </data>
+  <data name="CouldNotCheckApplicationBlocking" xml:space="preserve">
+    <value>No se pudo comprobar el bloqueo de aplicaciones: {0}</value>
+  </data>
+  <data name="EnterTimesInHourHHMmFormat" xml:space="preserve">
+    <value>Introduce las horas en formato de 24 horas HH:mm.</value>
+  </data>
+  <data name="SelectAtLeastOneDayToEnable" xml:space="preserve">
+    <value>Selecciona al menos un día para activar el horario.</value>
+  </data>
+  <data name="TheSessionHasEndedButItsEnd" xml:space="preserve">
+    <value>La sesión ha terminado, pero no se pudo guardar su finalización: {0}</value>
+  </data>
+  <data name="CouldNotSaveTheConfigurationClickRetry" xml:space="preserve">
+    <value>No se pudo guardar la configuración. Pulsa Reintentar tras resolver el problema: {0}</value>
+  </data>
+  <data name="BlockingHasIssues" xml:space="preserve">
+    <value>Bloqueo con incidencias</value>
+  </data>
+  <data name="BlockingAwaitsConfirmation" xml:space="preserve">
+    <value>Bloqueo pendiente de confirmación</value>
+  </data>
+  <data name="BlockingActive" xml:space="preserve">
+    <value>Bloqueo activo</value>
+  </data>
+  <data name="BlockingStopped" xml:space="preserve">
+    <value>Bloqueo detenido</value>
+  </data>
+  <data name="CheckWebsiteAndApplicationStatusBeforeAssuming" xml:space="preserve">
+    <value>Revisa el estado de webs y aplicaciones antes de dar el bloqueo por aplicado o retirado.</value>
+  </data>
+  <data name="ActivatedByTheWeeklySchedule" xml:space="preserve">
+    <value>Activado por el horario semanal</value>
+  </data>
+  <data name="ActivatedByASessionAndTheWeekly" xml:space="preserve">
+    <value>Activado por una sesión y el horario semanal</value>
+  </data>
+  <data name="ActivatedByAManualSession" xml:space="preserve">
+    <value>Activado por una sesión manual</value>
+  </data>
+  <data name="RulesAreReadyButAreNotBeing" xml:space="preserve">
+    <value>Las reglas están preparadas pero no se están aplicando</value>
+  </data>
+  <data name="TheScheduleIsAlsoActive" xml:space="preserve">
+    <value> El horario también está activo.</value>
+  </data>
+  <data name="SessionEnds" xml:space="preserve">
+    <value>La sesión termina {0} ({1}).{2}</value>
+  </data>
+  <data name="TheManualSessionHasNoEndTime" xml:space="preserve">
+    <value>La sesión manual no tiene hora de finalización.</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Finaliza {0}.</value>
+  </data>
+  <data name="NextBlock" xml:space="preserve">
+    <value>Próximo bloqueo {0}.</value>
+  </data>
+  <data name="CheckTheScheduledDaysAndTimes" xml:space="preserve">
+    <value>Revisa los días y horas de la programación.</value>
+  </data>
+  <data name="NoScheduleIsActive" xml:space="preserve">
+    <value>No hay ningún horario activo.</value>
+  </data>
+  <data name="ApplicationClosuresAreNotAuthorizedClickRetry" xml:space="preserve">
+    <value>Cierres de aplicaciones sin autorizar. Pulsa Reintentar cuando hayas guardado tu trabajo.</value>
+  </data>
+  <data name="WebsitesStatusPrefix" xml:space="preserve">
+    <value>Webs: </value>
+  </data>
+  <data name="UnconfirmedStatusRulesMayStillBeActive" xml:space="preserve">
+    <value>estado sin confirmar; pueden quedar reglas activas</value>
+  </data>
+  <data name="NotChecked" xml:space="preserve">
+    <value>sin comprobar</value>
+  </data>
+  <data name="AllowedOnlyPoliciesWrittenRestartChromeEdge" xml:space="preserve">
+    <value>solo permitidos: políticas escritas; reinicia Chrome/Edge</value>
+  </data>
+  <data name="RulesWrittenToHosts" xml:space="preserve">
+    <value>reglas escritas en hosts</value>
+  </data>
+  <data name="NoActiveRulesRestartTheBrowserIf" xml:space="preserve">
+    <value>sin reglas activas; reinicia el navegador si usaste Solo permitidos</value>
+  </data>
+  <data name="ApplicationsStatusPrefix" xml:space="preserve">
+    <value> · Aplicaciones: </value>
+  </data>
+  <data name="MonitoringSuspended" xml:space="preserve">
+    <value>vigilancia suspendida</value>
+  </data>
+  <data name="CheckFailed" xml:space="preserve">
+    <value>error de comprobación</value>
+  </data>
+  <data name="AwaitingAuthorization" xml:space="preserve">
+    <value>pendientes de autorización</value>
+  </data>
+  <data name="NotMonitoring" xml:space="preserve">
+    <value>sin vigilancia</value>
+  </data>
+  <data name="WebsiteCountSingular" xml:space="preserve">
+    <value>1 sitio web</value>
+  </data>
+  <data name="WebsiteCountPlural" xml:space="preserve">
+    <value>{0} sitios web</value>
+  </data>
+  <data name="ApplicationCountSingular" xml:space="preserve">
+    <value>1 aplicación</value>
+  </data>
+  <data name="ApplicationCountPlural" xml:space="preserve">
+    <value>{0} aplicaciones</value>
+  </data>
+  <data name="AllowedWebsitesOnlyModeChromeAndEdge" xml:space="preserve">
+    <value>Modo Solo sitios permitidos (Chrome y Edge): {0} sitios permitidos. {1} en la lista de bloqueo.</value>
+  </data>
+  <data name="AndOnTheBlockList" xml:space="preserve">
+    <value>{0} y {1} en la lista de bloqueo.</value>
+  </data>
+  <data name="Rule" xml:space="preserve">
+    <value>1 regla</value>
+  </data>
+  <data name="Rules" xml:space="preserve">
+    <value>{0} reglas</value>
+  </data>
+  <data name="AllowedWebsiteCountSingular" xml:space="preserve">
+    <value>1 sitio</value>
+  </data>
+  <data name="AllowedWebsiteCountPlural" xml:space="preserve">
+    <value>{0} sitios</value>
+  </data>
+  <data name="SessionInProgressEnds" xml:space="preserve">
+    <value>Sesión en curso: {0} restantes; termina {1}.</value>
+  </data>
+  <data name="ManualSessionInProgressWithNoEnd" xml:space="preserve">
+    <value>Sesión manual en curso sin hora de finalización.</value>
+  </data>
+  <data name="NoManualSessionTheScheduleKeepsBlocking" xml:space="preserve">
+    <value>No hay sesión manual; el horario mantiene el bloqueo activo.</value>
+  </data>
+  <data name="NoManualSessionIsInProgress" xml:space="preserve">
+    <value>No hay una sesión manual en curso.</value>
+  </data>
+  <data name="Unconfirmed" xml:space="preserve">
+    <value>Sin confirmar</value>
+  </data>
+  <data name="NotUsedInThisMode" xml:space="preserve">
+    <value>No se usa en este modo</value>
+  </data>
+  <data name="InHosts" xml:space="preserve">
+    <value>En hosts</value>
+  </data>
+  <data name="ModeDisabled" xml:space="preserve">
+    <value>Modo desactivado</value>
+  </data>
+  <data name="InPolicies" xml:space="preserve">
+    <value>En políticas</value>
+  </data>
+  <data name="NotMonitoringStatus" xml:space="preserve">
+    <value>Sin vigilancia</value>
+  </data>
+  <data name="NotAuthorized" xml:space="preserve">
+    <value>Sin autorizar</value>
+  </data>
+  <data name="TheScheduleContainsValuesThatNeedCorrecting" xml:space="preserve">
+    <value>La programación contiene datos pendientes de corregir.</value>
+  </data>
+  <data name="TheScheduleIsDisabled" xml:space="preserve">
+    <value>El horario está desactivado.</value>
+  </data>
+  <data name="EveryDay" xml:space="preserve">
+    <value>Todos los días</value>
+  </data>
+  <data name="MondayToFriday" xml:space="preserve">
+    <value>De lunes a viernes</value>
+  </data>
+  <data name="AllDay" xml:space="preserve">
+    <value>{0}, durante todo el día.</value>
+  </data>
+  <data name="ScheduleTimeRange" xml:space="preserve">
+    <value>{0}, de {1:HH\:mm} a {2:HH\:mm}.</value>
+  </data>
+  <data name="TodayAtTime" xml:space="preserve">
+    <value>hoy a las {0:HH:mm}</value>
+  </data>
+  <data name="TomorrowAtTime" xml:space="preserve">
+    <value>mañana a las {0:HH:mm}</value>
+  </data>
+  <data name="WeekdayAtTime" xml:space="preserve">
+    <value>el {0} a las {1:HH:mm}</value>
+  </data>
+  <data name="RemainingHours" xml:space="preserve">
+    <value>en {0}:{1:D2}:{2:D2}</value>
+  </data>
+  <data name="RemainingMinutes" xml:space="preserve">
+    <value>en {0:D2}:{1:D2}</value>
+  </data>
+  <data name="ActivityEvent" xml:space="preserve">
+    <value>Actividad · 1 evento</value>
+  </data>
+  <data name="ActivityEvents" xml:space="preserve">
+    <value>Actividad · {0} eventos</value>
+  </data>
+  <data name="ColdHamNeedsAttention" xml:space="preserve">
+    <value>Cold Ham necesita revisión</value>
+  </data>
+  <data name="ExitingWillEndTheSessionAndRemove" xml:space="preserve">
+    <value>Al salir se terminará la sesión y se retirarán las reglas web. El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?</value>
+  </data>
+  <data name="TheScheduleWillBeSavedButWill" xml:space="preserve">
+    <value>El horario quedará guardado, pero no funcionará mientras Cold Ham esté cerrado. ¿Salir?</value>
+  </data>
+  <data name="ExitColdHam" xml:space="preserve">
+    <value>Salir de Cold Ham</value>
+  </data>
+  <data name="RulesHaveBeenRemovedButTheEnd" xml:space="preserve">
+    <value>Las reglas se han retirado, pero no se pudo guardar el fin de la sesión. ¿Salir de todos modos?</value>
+  </data>
+  <data name="UnsavedConfiguration" xml:space="preserve">
+    <value>Configuración sin guardar</value>
+  </data>
+  <data name="TheSessionWillEndAndTheSchedule" xml:space="preserve">
+    <value>Se terminará la sesión y se desactivará el horario. ¿Quieres continuar?</value>
+  </data>
+  <data name="StopAll" xml:space="preserve">
+    <value>Detener todo</value>
+  </data>
+  <data name="TheSessionWasStoppedAndTheSchedule" xml:space="preserve">
+    <value>Se detuvo la sesión y se desactivó el horario.</value>
+  </data>
+  <data name="ColdHamWillKeepRunningFromThe" xml:space="preserve">
+    <value>Cold Ham seguirá funcionando desde el icono de la bandeja. Ábrelo desde allí para terminar una sesión o salir.</value>
+  </data>
+  <data name="ColdHamIsStillRunning" xml:space="preserve">
+    <value>Cold Ham sigue activo</value>
+  </data>
+  <data name="TheWindowWasHiddenInTheSystem" xml:space="preserve">
+    <value>La ventana se ocultó en la bandeja del sistema.</value>
+  </data>
+  <data name="OpenColdHam" xml:space="preserve">
+    <value>Abrir Cold Ham</value>
+  </data>
+  <data name="DurationMustBeAWholeNumberBetween" xml:space="preserve">
+    <value>La duración debe ser un número entero entre 1 y 1440 minutos.</value>
+  </data>
+  <data name="TheListExceedsTheChromeAndEdge" xml:space="preserve">
+    <value>La lista supera el límite de 1000 patrones de Chrome y Edge (hasta 249 dominios con variante www). Reduce los sitios permitidos.</value>
+  </data>
+  <data name="DamagedConfigurationPreservedAt" xml:space="preserve">
+    <value>Configuración dañada conservada en {0}. </value>
+  </data>
+  <data name="ThePreviousBackupWasRecovered" xml:space="preserve">
+    <value>Se recuperó la copia anterior. </value>
+  </data>
+  <data name="AnEmptyConfigurationWasCreated" xml:space="preserve">
+    <value>Se inició una configuración vacía. </value>
+  </data>
+  <data name="ManualActivationAndTheScheduleAreDisabled" xml:space="preserve">
+    <value>La activación manual y el horario están desactivados. Comprueba el estado de retirada de las reglas web y revisa la configuración antes de activarla.</value>
+  </data>
+  <data name="TheConfigurationMustBeAJSONObject" xml:space="preserve">
+    <value>La configuración debe ser un objeto JSON.</value>
+  </data>
+  <data name="TheConfigurationIsEmpty" xml:space="preserve">
+    <value>La configuración está vacía.</value>
+  </data>
+  <data name="TheConfigurationVersionIsInvalid" xml:space="preserve">
+    <value>La versión de configuración no es válida.</value>
+  </data>
+  <data name="TheConfigurationContainsInvalidRulesOrAn" xml:space="preserve">
+    <value>La configuración contiene reglas o un horario no válidos.</value>
+  </data>
+  <data name="ThisConfigurationWasCreatedByANewer" xml:space="preserve">
+    <value>Esta configuración fue creada por una versión más nueva de Cold Ham. Actualiza la aplicación; no se modificó el archivo.</value>
+  </data>
+  <data name="InvalidWebRule" xml:space="preserve">
+    <value>Regla web no válida: {0}</value>
+  </data>
+  <data name="ThePolicyRecoveryJournalIsInvalidBrowser" xml:space="preserve">
+    <value>El registro de recuperación de políticas no es válido: {0}. No se han modificado las políticas del navegador.</value>
+  </data>
+  <data name="BrowserPoliciesNotOwnedByColdHam" xml:space="preserve">
+    <value>Hay políticas de navegador ajenas a Cold Ham o modificadas por otro programa en {0}. No se sobrescribirán. Revisa chrome://policy y edge://policy o consulta al administrador del equipo.</value>
+  </data>
+  <data name="PolicyChangedDuringApply" xml:space="preserve">
+    <value>Una política ha cambiado mientras se aplicaba el bloqueo. Pulsa Reintentar.</value>
+  </data>
+  <data name="PolicyChangedDuringRemoval" xml:space="preserve">
+    <value>Una política ha cambiado mientras se retiraba el bloqueo. Se ha conservado; revisa las políticas del navegador.</value>
+  </data>
+  <data name="TheHostsFileUsesUTFConvertIt" xml:space="preserve">
+    <value>El archivo hosts usa UTF-32. Conviértelo a UTF-8 antes de aplicar reglas.</value>
+  </data>
+  <data name="TheColdHamSectionInHostsHas" xml:space="preserve">
+    <value>La sección de Cold Ham en hosts tiene marcadores incompletos, duplicados o ambiguos. Revisa # Cold Ham BEGIN y # Cold Ham END; no se ha modificado el archivo.</value>
+  </data>
+  <data name="ProtectedProcessOrUnverifiablePathPID" xml:space="preserve">
+    <value>Proceso protegido o ruta no verificable: PID {0}.</value>
+  </data>
+  <data name="ClosureOfProcessWasNotConfirmed" xml:space="preserve">
+    <value>No se confirmó el cierre del proceso {0}.</value>
+  </data>
+  <data name="CouldNotCheckOrCloseProcess" xml:space="preserve">
+    <value>No se pudo comprobar o cerrar el proceso {0}: {1}</value>
+  </data>
+  <data name="CouldNotVerifyThePathForRule" xml:space="preserve">
+    <value>No se pudo verificar la ruta para la regla {0}.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Cargando…</value>
+  </data>
+  <data name="MinutesBetweenAnd" xml:space="preserve">
+    <value>Minutos: entre 1 y 1440</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Iniciar</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Sin límite</value>
+  </data>
+  <data name="AttentionNeeded" xml:space="preserve">
+    <value>Revisión necesaria</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="RestartAsAdministrator" xml:space="preserve">
+    <value>Reiniciar como administrador</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Resumen</value>
+  </data>
+  <data name="CurrentConfiguration" xml:space="preserve">
+    <value>Configuración actual</value>
+  </data>
+  <data name="Scheduling" xml:space="preserve">
+    <value>Programación</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Funcionamiento</value>
+  </data>
+  <data name="KeepColdHamOpenToBlockApplications" xml:space="preserve">
+    <value>Mantén Cold Ham abierto para bloquear aplicaciones. Las reglas web permanecen en el archivo hosts hasta detener el bloqueo.</value>
+  </data>
+  <data name="WebsitesTab" xml:space="preserve">
+    <value>Sitios web</value>
+  </data>
+  <data name="BlockedWebsites" xml:space="preserve">
+    <value>Sitios bloqueados</value>
+  </data>
+  <data name="AddADomainOrPasteAWeb" xml:space="preserve">
+    <value>Añade un dominio o pega una dirección web.</value>
+  </data>
+  <data name="ExampleRedditCom" xml:space="preserve">
+    <value>Ejemplo: reddit.com</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Añadir</value>
+  </data>
+  <data name="DomainAndWwwVariant" xml:space="preserve">
+    <value>Dominio y variante www</value>
+  </data>
+  <data name="NoWebsitesAddedYet" xml:space="preserve">
+    <value>Aún no has añadido sitios web.</value>
+  </data>
+  <data name="Allowed" xml:space="preserve">
+    <value>Permitidos</value>
+  </data>
+  <data name="AllowedWebsitesAllowlist" xml:space="preserve">
+    <value>Sitios permitidos (lista blanca)</value>
+  </data>
+  <data name="BlockAllWebsitesExceptTheseChromeAnd" xml:space="preserve">
+    <value>Bloquear toda la web salvo estos sitios (Chrome y Edge)</value>
+  </data>
+  <data name="DuringASessionOrActiveScheduleOnly" xml:space="preserve">
+    <value>Durante una sesión o un horario activo, solo se permiten estos dominios y su variante www. Una lista vacía bloquea todos los sitios.</value>
+  </data>
+  <data name="RestartChromeEdgeAfterEnablingOrStopping" xml:space="preserve">
+    <value>Reinicia Chrome/Edge tras activar o detener este modo. No cubre otros navegadores ni perfiles de Edge con cuenta Microsoft personal.</value>
+  </data>
+  <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
+    <value>Dominio permitido, por ejemplo: example.com</value>
+  </data>
+  <data name="NoAllowedWebsitesAddedYet" xml:space="preserve">
+    <value>Aún no has añadido sitios permitidos.</value>
+  </data>
+  <data name="ApplicationsTab" xml:space="preserve">
+    <value>Aplicaciones</value>
+  </data>
+  <data name="BlockedApplications" xml:space="preserve">
+    <value>Aplicaciones bloqueadas</value>
+  </data>
+  <data name="SelectAnExecutableOrEnterItsProcess" xml:space="preserve">
+    <value>Selecciona un ejecutable o escribe su nombre de proceso.</value>
+  </data>
+  <data name="ExampleGameExe" xml:space="preserve">
+    <value>Ejemplo: juego.exe</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Examinar…</value>
+  </data>
+  <data name="NoApplicationsAddedYet" xml:space="preserve">
+    <value>Aún no has añadido aplicaciones.</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>Horario</value>
+  </data>
+  <data name="WeeklySchedule" xml:space="preserve">
+    <value>Programación semanal</value>
+  </data>
+  <data name="EnableSchedule" xml:space="preserve">
+    <value>Activar horario</value>
+  </data>
+  <data name="ActiveDays" xml:space="preserve">
+    <value>Días activos</value>
+  </data>
+  <data name="Mon" xml:space="preserve">
+    <value>Lun</value>
+  </data>
+  <data name="Tue" xml:space="preserve">
+    <value>Mar</value>
+  </data>
+  <data name="Wed" xml:space="preserve">
+    <value>Mié</value>
+  </data>
+  <data name="Thu" xml:space="preserve">
+    <value>Jue</value>
+  </data>
+  <data name="Fri" xml:space="preserve">
+    <value>Vie</value>
+  </data>
+  <data name="Sat" xml:space="preserve">
+    <value>Sáb</value>
+  </data>
+  <data name="Sun" xml:space="preserve">
+    <value>Dom</value>
+  </data>
+  <data name="TimeRange" xml:space="preserve">
+    <value>Franja horaria</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Desde</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>hasta</value>
+  </data>
+  <data name="TheScheduleIsSavedAutomaticallyIfThe" xml:space="preserve">
+    <value>El horario se guarda automáticamente. Si la hora final es anterior a la inicial, el bloqueo continuará durante la noche.</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="HowItWorks" xml:space="preserve">
+    <value>Cómo funciona</value>
+  </data>
+  <data name="ColdHamBlocksExactDomainsAndTheir" xml:space="preserve">
+    <value>Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.</value>
+  </data>
+  <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
+    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Incluye el dominio y su variante www; añade otros subdominios por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas del navegador siguen disponibles.</value>
+  </data>
+  <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
+    <value>Cold Ham vigila los procesos configurados mientras la aplicación está abierta. Al iniciar un bloqueo, cualquier aplicación coincidente se cerrará y podría perder trabajo sin guardar.</value>
+  </data>
+  <data name="Permissions" xml:space="preserve">
+    <value>Permisos</value>
+  </data>
+  <data name="EditingTheHostsFileRequiresAdministratorPermissions" xml:space="preserve">
+    <value>Editar el archivo hosts requiere permisos de administrador. Puedes configurar las reglas sin elevar permisos y reiniciar como administrador al aplicarlas.</value>
+  </data>
+  <data name="Activity" xml:space="preserve">
+    <value>Actividad</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Preparado</value>
+  </data>
+  <data name="Pending" xml:space="preserve">
+    <value>Pendiente</value>
+  </data>
+  <data name="Review" xml:space="preserve">
+    <value>Revisar</value>
+  </data>
+  <data name="Monitoring" xml:space="preserve">
+    <value>Vigilando</value>
+  </data>
+  <data name="MonitoringDetail" xml:space="preserve">
+    <value>vigilando</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Salir</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="EnterADomainForExampleRedditCom" xml:space="preserve">
+    <value>Introduce un dominio, por ejemplo reddit.com.</value>
+  </data>
+  <data name="WildcardsAreNotSupportedByWindowsHosts" xml:space="preserve">
+    <value>Los comodines no son compatibles con el bloqueo mediante el archivo hosts de Windows.</value>
+  </data>
+  <data name="TheWebsiteAddressIsNotValid" xml:space="preserve">
+    <value>La dirección web no es válida.</value>
+  </data>
+  <data name="EnterADomainNameRatherThanAn" xml:space="preserve">
+    <value>Introduce un dominio en lugar de una dirección IP.</value>
+  </data>
+  <data name="TheDomainContainsUnsupportedCharacters" xml:space="preserve">
+    <value>El dominio contiene caracteres no compatibles.</value>
+  </data>
+  <data name="TheDomainNameIsNotValid" xml:space="preserve">
+    <value>El nombre de dominio no es válido.</value>
+  </data>
+  <data name="TheExecutablePathIsNotValid" xml:space="preserve">
+    <value>La ruta del ejecutable no es válida.</value>
+  </data>
+  <data name="EnterAnExecutableNameOrChooseAn" xml:space="preserve">
+    <value>Introduce el nombre de un ejecutable o selecciona un archivo .exe.</value>
+  </data>
+  <data name="OnlyWindowsExeApplicationsCanBeBlocked" xml:space="preserve">
+    <value>Solo se pueden bloquear aplicaciones de Windows con extensión .exe.</value>
+  </data>
+  <data name="IsProtectedAndCannotBeAdded" xml:space="preserve">
+    <value>{0} está protegido y no se puede añadir.</value>
+  </data>
+</root>

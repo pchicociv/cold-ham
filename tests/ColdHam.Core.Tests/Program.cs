@@ -40,7 +40,9 @@ var tests = new (string Name, Func<Task> Run)[]
     ("rolls back failed policy writes and retries cleanup", BrowserPolicyTests.Failures),
     ("preserves externally changed browser policies", BrowserPolicyTests.ExternalChanges),
     ("rejects corrupted policy recovery journals", BrowserPolicyTests.InvalidJournal),
-    ("persists and validates the website blocking mode", BrowserPolicyTests.ModePersistence)
+    ("persists and validates the website blocking mode", BrowserPolicyTests.ModePersistence),
+    ("persists language with Spanish defaults and safe fallback", LocalizationTests.Persistence),
+    ("provides complete Spanish and English resources and formats", LocalizationTests.Resources)
 };
 
 var failed = 0;

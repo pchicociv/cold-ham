@@ -12,7 +12,7 @@ public static class WebsiteRules
 
     public static string[] ExpandDomains(IEnumerable<string> websites) => websites
         .Select(domain => RuleNormalizer.TryNormalizeDomain(domain, out var value, out var error)
-            ? value : throw new InvalidDataException($"Regla web no válida: {error}"))
+            ? value : throw new InvalidDataException(LocalizedText.Format("InvalidWebRule", error)))
         .SelectMany(domain => domain.StartsWith("www.", StringComparison.Ordinal)
             ? new[] { domain } : new[] { domain, $"www.{domain}" })
         .Distinct(StringComparer.OrdinalIgnoreCase)

@@ -8,6 +8,8 @@ public sealed class BlockConfiguration
 
     public int Version { get; set; } = CurrentVersion;
 
+    public string Language { get; set; } = "es";
+
     public List<string> Websites { get; set; } = [];
 
     public List<string> AllowedWebsites { get; set; } = [];
