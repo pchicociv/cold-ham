@@ -6,6 +6,70 @@ using ColdHam.Core;
 
 internal static class LocalizationTests
 {
+    public static async Task InstallationLanguage()
+    {
+        using var directory = new TestDirectory();
+        var store = new JsonConfigurationStore(Path.Combine(directory.Path, "settings.json"));
+        var preference = new InstallationLanguagePreference(Path.Combine(directory.Path, "installation-language.txt"));
+        var configuration = await store.LoadAsync();
+        await preference.ApplyAsync(store, configuration);
+        Check(configuration.Language == "es" && !File.Exists(store.FilePath), "No setup preference must preserve the default and avoid writes.");
+        configuration.Websites.Add("example.com");
+        configuration.ManualSession = new ManualSession { StartedAtUtc = DateTimeOffset.UtcNow };
+        configuration.Schedule.Enabled = true;
+        var sessionId = configuration.ManualSession.Id;
+        await store.SaveAsync(configuration);
+        var original = await File.ReadAllBytesAsync(store.FilePath);
+        foreach (var language in new[] { "en", "es" })
+        {
+            await preference.WriteAsync(language);
+            Check((await File.ReadAllBytesAsync(store.FilePath)).SequenceEqual(original), "Setup must not rewrite settings.");
+            configuration = await store.LoadAsync();
+            await preference.ApplyAsync(store, configuration);
+            var saved = await store.LoadAsync();
+            Check(saved.Language == language && !File.Exists(preference.FilePath), "Choice must persist and be consumed once.");
+            Check(saved.Websites.SequenceEqual(["example.com"]) && saved.ManualSession?.Id == sessionId && saved.Schedule.Enabled,
+                "Installation language must preserve rules, sessions and schedule.");
+            original = await File.ReadAllBytesAsync(store.FilePath);
+        }
+        configuration.Language = "en";
+        await store.SaveAsync(configuration);
+        await preference.ApplyAsync(store, configuration);
+        Check((await store.LoadAsync()).Language == "en", "Later app choices and updates must not reapply installation language.");
+        await File.WriteAllTextAsync(preference.FilePath, "fr");
+        await preference.ApplyAsync(store, configuration);
+        Check(configuration.Language == "en", "Invalid installation language must not reset user language.");
+        var rejected = false;
+        try { await preference.WriteAsync("fr"); } catch (ArgumentException) { rejected = true; }
+        Check(rejected, "Installer must reject unsupported languages.");
+
+        await preference.WriteAsync("es");
+        await File.WriteAllTextAsync(store.FilePath, "{\"Version\":999}");
+        var futureBytes = await File.ReadAllBytesAsync(store.FilePath);
+        var futureRejected = false;
+        try { await store.LoadAsync(); } catch (UnsupportedConfigurationVersionException) { futureRejected = true; }
+        var unchangedBytes = await File.ReadAllBytesAsync(store.FilePath);
+        Check(futureRejected && File.Exists(preference.FilePath) && futureBytes.SequenceEqual(unchangedBytes),
+            "Future settings must be rejected before consuming the setup choice.");
+    }
+
+    public static async Task InstallationLanguageRetry()
+    {
+        using var directory = new TestDirectory();
+        var store = new JsonConfigurationStore(Path.Combine(directory.Path, "settings.json"));
+        var preference = new InstallationLanguagePreference(Path.Combine(directory.Path, "installation-language.txt"));
+        var configuration = new BlockConfiguration();
+        await preference.WriteAsync("en");
+        Directory.CreateDirectory(store.FilePath + ".tmp");
+        var failed = false;
+        try { await preference.ApplyAsync(store, configuration); }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException) { failed = true; }
+        Check(failed && File.Exists(preference.FilePath) && configuration.Language == "es", "Failed saves must restore in-memory language and retain pending choice.");
+        Directory.Delete(store.FilePath + ".tmp");
+        await preference.ApplyAsync(store, configuration);
+        Check((await store.LoadAsync()).Language == "en" && !File.Exists(preference.FilePath), "Retry must apply and consume the choice.");
+    }
+
     public static async Task Persistence()
     {
         using var directory = new TestDirectory();

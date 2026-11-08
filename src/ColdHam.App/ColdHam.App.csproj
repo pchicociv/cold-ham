@@ -7,10 +7,12 @@
     <AssemblyName>ColdHam.App</AssemblyName>
     <RootNamespace>ColdHam.App</RootNamespace>
     <StartupObject>ColdHam.App.App</StartupObject>
-    <Version>1.0.0</Version>
+    <ApplicationIcon>Assets/ColdHam.ico</ApplicationIcon>
+    <Version>1.0.1</Version>
     <UpdateRepositoryUrl Condition="'$(UpdateRepositoryUrl)' == ''">https://github.com/pchicociv/cold-ham</UpdateRepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="Assets/ColdHam.ico" />
     <ApplicationDefinition Remove="App.xaml" />
     <Page Include="App.xaml" />
     <PackageReference Include="Velopack" Version="1.2.161" />

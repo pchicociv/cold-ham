@@ -3,6 +3,8 @@ using ColdHam.Windows;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("applies and consumes installation language without losing settings", LocalizationTests.InstallationLanguage),
+    ("keeps installation language pending when persistence fails", LocalizationTests.InstallationLanguageRetry),
     ("defers updates until sessions, recovery and edits are settled", UpdateTests.RestartSafety),
     ("defers updates near scheduled and overnight blocks", UpdateTests.ScheduleSafety),
     ("downloads before authorizing a safe single restart", UpdateTests.DownloadAndRestart),

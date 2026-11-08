@@ -7,6 +7,7 @@ internal sealed class TrayIconService : IDisposable
 {
     private readonly MainWindow _window;
     private readonly Forms.NotifyIcon _icon;
+    private readonly System.Drawing.Icon _trayImage;
     private readonly Forms.ToolStripMenuItem _state;
     private bool _disposed;
 
@@ -23,9 +24,16 @@ internal sealed class TrayIconService : IDisposable
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(LocalizedText.Get("Exit"), null, async (_, _) => await _window.RequestExitFromTrayAsync());
 
+        using (var stream = System.Windows.Application.GetResourceStream(
+            new Uri("pack://application:,,,/Assets/ColdHam.ico")).Stream)
+        using (var source = new System.Drawing.Icon(stream, Forms.SystemInformation.SmallIconSize))
+        {
+            _trayImage = (System.Drawing.Icon)source.Clone();
+        }
+
         _icon = new Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = _trayImage,
             Text = "Cold Ham",
             ContextMenuStrip = menu,
             Visible = true
@@ -65,5 +73,6 @@ internal sealed class TrayIconService : IDisposable
         _window.NotificationRaised -= ShowNotification;
         _icon.Visible = false;
         _icon.Dispose();
+        _trayImage.Dispose();
     }
 }

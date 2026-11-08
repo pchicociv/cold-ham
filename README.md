@@ -10,7 +10,7 @@ Cold Ham is a Windows desktop utility for blocking distracting websites and appl
 - An allowed website list for exceptions, plus an optional **Allowed websites only** mode for Chrome and Edge.
 - Application blocking by executable name or full `.exe` path, with confirmation before closing matching processes.
 - A system tray icon, activity messages, and recovery controls.
-- Spanish and English interfaces. Spanish is the default; select **English** in the **Idioma / Language** selector.
+- Spanish and English interfaces. Choose **Español** or **English** before installing, and change it later in the **Idioma / Language** selector. Spanish is the default.
 - Installation and automatic updates through Velopack for packaged builds.
 
 ## Build and run

@@ -14,6 +14,16 @@ El script compila la solución, ejecuta las pruebas, publica una aplicación aut
 
 Los archivos de salida incluyen `ColdHam-win-Setup.exe`, el paquete completo `.nupkg`, el ZIP portátil y `releases.win.json`. Distribuir preferentemente el instalador. El perfil anterior `Portable-win-x64` sigue disponible, pero su ejecutable suelto no dispone de instalación administrada y muestra que las actualizaciones no están disponibles.
 
+### Idioma de instalación
+
+`ColdHam-win-Setup.exe` abre un selector **Español / English** antes de instalar. La ventana cambia al idioma elegido y permite cancelar sin instalar ni guardar preferencias. Si Cold Ham está abierto, pide salir desde la bandeja antes de reintentar. Durante la copia se deshabilitan los controles y el cierre para no interrumpir el instalador interno.
+
+`ColdHam.Setup` es una ventana WPF autónoma de .NET 10, sin nuevas dependencias NuGet. El script incrusta el instalador original de Velopack y sustituye únicamente el EXE de instalación en los archivos de entrega. Mantiene `.nupkg`, ZIP portátil y manifiestos de actualización; las actualizaciones automáticas no pasan por el selector. El ejecutable de instalación es mayor porque incorpora su propio runtime de escritorio. Compilar la solución permite revisar la ventana; publicar un instalador utilizable exige `Build-Release.ps1`, que aporta el paquete incrustado.
+
+Tras instalar correctamente para el usuario actual, se guarda `%LOCALAPPDATA%/ColdHam/installation-language.txt` y se abre la aplicación. Cold Ham consume esa preferencia al cargar la configuración, guarda `Language` mediante el almacén habitual y elimina la preferencia solo después del guardado. Conserva reglas, sesiones, horario y recuperación de archivos dañados; un fallo de guardado deja la elección pendiente para reintentar. Una actualización posterior conserva el idioma que se haya elegido dentro de la aplicación.
+
+El EXE distribuido ofrece instalación interactiva; no expone los parámetros de línea de comandos del instalador interno. Los errores propios de Windows pueden aparecer en el idioma del sistema. La implementación utiliza las opciones documentadas de [Setup.exe](https://docs.velopack.io/reference/cli/content/setup-windows) y [Update.exe](https://docs.velopack.io/reference/cli/content/update-windows).
+
 Para usar otro repositorio público, pasar `-ReleaseRepository propietario/repositorio`. El destino se incorpora al ensamblado mediante `UpdateRepositoryUrl`; no es una preferencia editable del usuario. El workflow de este repositorio publica en `pchicociv/cold-ham`.
 
 ## Publicar en GitHub

@@ -71,13 +71,14 @@ public partial class MainWindow : Window
         try
         {
             _configuration = await _store.LoadAsync();
+            _recoveryMessage = _store.RecoveryMessage;
+            await new InstallationLanguagePreference().ApplyAsync(_store, _configuration);
             ApplyLanguage(_configuration.Language);
             _loadFailed = false;
             _configurationError = null;
             _websites.Clear();
             _allowedWebsites.Clear();
             _applications.Clear();
-            _recoveryMessage = _store.RecoveryMessage;
             if (_recoveryMessage is not null) AddActivity(_recoveryMessage);
             foreach (var website in _configuration.Websites)
             {

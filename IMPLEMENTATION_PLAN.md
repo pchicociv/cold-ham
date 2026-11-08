@@ -1,5 +1,14 @@
 # Cold Ham implementation plan
 
+## Idioma durante la instalación — noviembre de 2026
+
+- Nuevo proyecto `ColdHam.Setup` en WPF/.NET 10: selector Español/English antes de instalar, textos traducidos, cancelación previa, progreso y errores. No solicita elevación. Si detecta Cold Ham abierto, exige salir desde la bandeja; no finaliza procesos.
+- Conserva Velopack para instalación y actualizaciones: `Build-Release.ps1` genera el paquete habitual e incrusta su Setup.exe en un instalador autónomo con selector. Solo sustituye el EXE distribuido; los paquetes y manifiestos usados por las actualizaciones no cambian. La publicación del nuevo proyecto requiere un payload y el build de desarrollo falla con un mensaje claro si se intenta instalar sin él.
+- La instalación correcta deja una preferencia de idioma en LocalApplicationData/ColdHam. La aplicación la incorpora al cargar sus ajustes y la consume después de persistirlos. No se reescriben reglas o sesiones desde el instalador; una configuración futura sigue rechazada y un fallo de guardado conserva la elección pendiente.
+- Las actualizaciones automáticas y los siguientes arranques conservan el idioma guardado; no vuelven a mostrar el selector. El ZIP portátil mantiene el selector de la aplicación.
+- Verificación: 48 pruebas aprobadas, incluidas aplicación única de la preferencia, conservación de sesión/horario/reglas, idioma inválido, versión futura y reintento tras fallo de escritura. Empaquetado completo generado localmente; NuGet emitió NU1900 por falta de acceso al servicio de vulnerabilidades. La instalación real sobre un perfil limpio y su desinstalación quedan pendientes de comprobación manual.
+- Se verificó el cambio español → inglés → español en una instancia WPF aislada y se revisaron los renderizados de ambos idiomas, sin recortes. El controlador del escritorio falló al identificar la ventana de vista previa; no se afirma una prueba completa mediante interacción nativa.
+
 ## Goal
 
 Build a simple Windows desktop application in .NET that lets a user maintain website and application block lists, activate them immediately or on a weekly schedule, and reverse every system change cleanly.

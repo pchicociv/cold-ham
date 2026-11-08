@@ -1,0 +1,34 @@
+<Window x:Class="ColdHam.Setup.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cold Ham" Icon="Assets/ColdHam.ico" Width="460" SizeToContent="Height"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Text="Instalar Cold Ham" />
+        <StackPanel Grid.Row="1" Margin="0,20,0,0">
+            <Label Content="_Idioma / Language" Target="{Binding ElementName=LanguageSelector}" Padding="0,0,0,6" />
+            <ComboBox x:Name="LanguageSelector" MinHeight="30" SelectedValuePath="Tag"
+                      SelectionChanged="Language_Changed" AutomationProperties.Name="Idioma / Language">
+                <ComboBoxItem Tag="es" Content="Español" />
+                <ComboBoxItem Tag="en" Content="English" />
+            </ComboBox>
+        </StackPanel>
+        <TextBlock x:Name="Description" Grid.Row="2" Margin="0,16,0,0" TextWrapping="Wrap" />
+        <TextBlock x:Name="Status" Grid.Row="3" Margin="0,12,0,0" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+        <ProgressBar x:Name="Progress" Grid.Row="4" Height="5" Margin="0,14,0,0" Visibility="Collapsed" />
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+            <Button x:Name="CancelButton" MinWidth="90" Padding="14,6" Margin="0,0,8,0" Click="Cancel_Click" Content="Cancelar" IsCancel="True" />
+            <Button x:Name="InstallButton" MinWidth="110" Padding="14,6" Click="Install_Click" Content="Instalar" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>
