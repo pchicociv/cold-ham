@@ -43,7 +43,7 @@ Para usar otro repositorio público, pasar `-ReleaseRepository propietario/repos
 - No reinicia durante los cinco minutos anteriores al siguiente horario. Este margen reduce el riesgo de coincidir con una activación; no garantiza la duración de una instalación en un equipo lento. La vigilancia sigue siendo interna al proceso, sin servicio.
 - Se desactiva la aplicación automática de paquetes durante el arranque de Velopack. Cold Ham carga y evalúa primero su configuración, incluso si quedó una descarga de una ejecución anterior.
 - Después de descargar, la política se vuelve a evaluar inmediatamente antes de iniciar el actualizador. Solo entonces se cierra la instancia y se libera su mutex. Un fallo al arrancar el actualizador conserva la aplicación abierta y permite reintentar.
-- Los ajustes, idioma, reglas y diario de recuperación permanecen en `%LocalAppData%/ColdHam`, separados de los binarios reemplazables. No se cambia el formato de configuración en esta entrega.
+- Los ajustes, idioma, reglas y diario de recuperación permanecen en `%LocalAppData%/ColdHam`, separados de los binarios reemplazables. Desde 1.0.2, la configuración usa la versión 4 para distinguir dominios exactos y reglas con todos sus subdominios. Las configuraciones anteriores migran sin ampliar permisos; los binarios antiguos no pueden abrir el formato nuevo.
 
 ## Integridad, firma y recuperación
 

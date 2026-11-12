@@ -116,7 +116,7 @@ public sealed class JsonConfigurationStore
             || configuration.ManualSession is { StartedAtUtc: var sessionStart } && sessionStart == default
             || configuration.ManualSession is { StartedAtUtc: var started, EndsAtUtc: var ends } && ends is not null && ends <= started
             || configuration.Websites.Any(value => !RuleNormalizer.TryNormalizeDomain(value, out _, out _))
-            || configuration.AllowedWebsites.Any(value => !RuleNormalizer.TryNormalizeDomain(value, out _, out _))
+            || configuration.AllowedWebsites.Any(value => !RuleNormalizer.TryNormalizeAllowedDomain(value, out _, out _))
             || configuration.Applications.Any(value => !RuleNormalizer.TryNormalizeApplication(value, out _, out _)))
         {
             throw new InvalidDataException(LocalizedText.Get("TheConfigurationContainsInvalidRulesOrAn"));

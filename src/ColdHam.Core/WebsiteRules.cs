@@ -2,12 +2,12 @@ namespace ColdHam.Core;
 
 public static class WebsiteRules
 {
-    /// <summary>Expands exact domains and their www variants before applying exceptions.</summary>
+    /// <summary>Expands blocked hosts, then excludes exact or subdomain allow rules.</summary>
     public static string[] GetBlockedDomains(IEnumerable<string> websites, IEnumerable<string> allowedWebsites)
     {
         var blocked = ExpandDomains(websites);
-        var allowed = ExpandDomains(allowedWebsites).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        return blocked.Where(domain => !allowed.Contains(domain)).ToArray();
+        var allowed = allowedWebsites.Select(AllowedWebsiteRule.Parse).ToArray();
+        return blocked.Where(domain => !allowed.Any(rule => rule.Matches(domain))).ToArray();
     }
 
     public static string[] ExpandDomains(IEnumerable<string> websites) => websites

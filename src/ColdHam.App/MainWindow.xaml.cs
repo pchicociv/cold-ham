@@ -305,7 +305,8 @@ public partial class MainWindow : Window
 
     private async Task AddAllowedWebsiteAsync()
     {
-        if (!RuleNormalizer.TryNormalizeDomain(AllowedWebsiteInput.Text, out var normalized, out var error))
+        if (!RuleNormalizer.TryNormalizeAllowedDomain(AllowedWebsiteInput.Text, out var normalized, out var error,
+                IncludeAllowedSubdomainsToggle.IsChecked == true))
         {
             MessageBox.Show(error, LocalizedText.Get("InvalidWebsite"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;

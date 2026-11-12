@@ -427,7 +427,7 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>La duración debe ser un número entero entre 1 y 1440 minutos.</value>
   </data>
   <data name="TheListExceedsTheChromeAndEdge" xml:space="preserve">
-    <value>La lista supera el límite de 1000 patrones de Chrome y Edge (hasta 249 dominios con variante www). Reduce los sitios permitidos.</value>
+    <value>La lista supera el límite de 1000 patrones de Chrome y Edge, incluidas las excepciones internas. Reduce los sitios permitidos.</value>
   </data>
   <data name="DamagedConfigurationPreservedAt" xml:space="preserve">
     <value>Configuración dañada conservada en {0}. </value>
@@ -559,13 +559,22 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>Bloquear toda la web salvo estos sitios (Chrome y Edge)</value>
   </data>
   <data name="DuringASessionOrActiveScheduleOnly" xml:space="preserve">
-    <value>Durante una sesión o un horario activo, solo se permiten estos dominios y su variante www. Una lista vacía bloquea todos los sitios.</value>
+    <value>Durante una sesión o un horario activo, solo se permiten estas entradas. *.example.com incluye el dominio y todos sus subdominios; sin *., se incluye solo el dominio y su variante www. Una lista vacía bloquea todos los sitios.</value>
   </data>
   <data name="RestartChromeEdgeAfterEnablingOrStopping" xml:space="preserve">
     <value>Reinicia Chrome/Edge tras activar o detener este modo. No cubre otros navegadores ni perfiles de Edge con cuenta Microsoft personal.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
-    <value>Dominio permitido, por ejemplo: example.com</value>
+    <value>Dominio permitido: example.com. Para incluir todos sus subdominios, marca la casilla o escribe *.example.com.</value>
+  </data>
+  <data name="IncludeAllSubdomains" xml:space="preserve">
+    <value>Incluir todos los subdominios</value>
+  </data>
+  <data name="IncludeAllSubdomainsHelp" xml:space="preserve">
+    <value>Permite el dominio principal y sus subdominios de cualquier nivel. Por ejemplo, oaiusercontent.com incluye files.oaiusercontent.com. Se muestra como *.oaiusercontent.com.</value>
+  </data>
+  <data name="InvalidAllowedDomainPattern" xml:space="preserve">
+    <value>Introduce un dominio o usa *.example.com para permitirlo con todos sus subdominios. No se admiten otros comodines.</value>
   </data>
   <data name="NoAllowedWebsitesAddedYet" xml:space="preserve">
     <value>Aún no has añadido sitios permitidos.</value>
@@ -643,7 +652,7 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Incluye el dominio y su variante www; añade otros subdominios por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas del navegador siguen disponibles.</value>
+    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Al añadir un dominio, marca Incluir todos los subdominios o escribe *.example.com para permitir también sus subdominios de cualquier nivel. Sin esa opción, se permite el dominio y su variante www. No incluye otros dominios que el sitio utilice para imágenes o archivos; añádelos por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas y las herramientas de desarrollador del navegador siguen disponibles.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham vigila los procesos configurados mientras la aplicación está abierta. Al iniciar un bloqueo, cualquier aplicación coincidente se cerrará y podría perder trabajo sin guardar.</value>

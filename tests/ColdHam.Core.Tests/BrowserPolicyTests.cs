@@ -7,9 +7,10 @@ internal static class BrowserPolicyTests
     {
         var patterns = BrowserPolicyPlan.BuildAllowlist(["https://EXAMPLE.com/path", "example.com"]);
         Check(patterns.Contains("http://.example.com") && patterns.Contains("https://.www.example.com"), "Allow HTTP and HTTPS for the exact domain and www.");
-        Check(patterns.Length == 7 && !patterns.Contains("*"), "Duplicates must not broaden allow rules.");
-        Check(BrowserPolicyPlan.BuildAllowlist([]).All(value => !value.StartsWith("http", StringComparison.Ordinal)), "Empty list must allow no website.");
-        Check(BrowserPolicyPlan.BuildAllowlist(Enumerable.Range(1, 249).Select(i => $"site{i}.com")).Length == 999, "Policy limit must be checked after expansion.");
+        Check(patterns.Length == 8 && !patterns.Contains("*"), "Duplicates must not broaden allow rules.");
+        Check(patterns.Contains("devtools://*"), "DevTools must remain accessible when a website is allowed.");
+        Check(BrowserPolicyPlan.BuildAllowlist([]).SequenceEqual(new[] { "chrome://*", "edge://*", "chrome-untrusted://*", "devtools://*" }), "Empty list must preserve only internal browser pages and DevTools, without allowing websites.");
+        Check(BrowserPolicyPlan.BuildAllowlist(Enumerable.Range(1, 249).Select(i => $"site{i}.com")).Length == BrowserPolicyPlan.MaximumEntries, "Policy limit must include the DevTools exception after domain expansion.");
         Expect<InvalidDataException>(() => BrowserPolicyPlan.BuildAllowlist(Enumerable.Range(1, 250).Select(i => $"site{i}.com")));
         return Task.CompletedTask;
     }
@@ -28,10 +29,38 @@ internal static class BrowserPolicyTests
         Check(!fixture.Registry.Values.Values.SelectMany(values => values.Values).Contains("https://.example.com"), "Removed exceptions must not survive updates.");
         await fixture.Manager.ApplyAsync([]);
         Check(fixture.Registry.Values.Values.SelectMany(values => values.Values).Count(value => Equals(value, "*")) == 2, "Empty allowlist must still block all sites in both browsers.");
+        foreach (var path in BrowserPolicyManager.PolicyPaths.Where(path => path.EndsWith("URLAllowlist", StringComparison.Ordinal)))
+            Check(fixture.Registry.Read(path).Values.Contains("devtools://*"), "Both browsers must retain DevTools access after allowlist updates, even with no allowed websites.");
         // Recreate the manager to model process restart with persisted recovery data.
         await new BrowserPolicyManager(fixture.Registry, fixture.Journal).RemoveAsync();
         Check(fixture.Registry.Values.Values.All(values => values.Count == 0) && !File.Exists(fixture.Journal), "Stop after restart must remove every owned value and its journal.");
         await fixture.Manager.RemoveAsync();
+    }
+
+    public static async Task SubdomainPolicies()
+    {
+        var patterns = BrowserPolicyPlan.BuildAllowlist(["*.EXAMPLE.com", "*.example.com", "other.com"]);
+        Check(patterns.Length == 10 && patterns.Contains("https://example.com") && patterns.Contains("http://example.com")
+            && patterns.Contains("https://.other.com") && patterns.Contains("https://.www.other.com")
+            && !patterns.Contains("https://.example.com") && !patterns.Any(value => value.Contains("*.example.com", StringComparison.Ordinal)),
+            "Subdomain opt-in must use Chromium's host matching while retaining exact rules and deduplicating entries.");
+        Check(BrowserPolicyPlan.BuildAllowlist(Enumerable.Range(1, 498).Select(i => $"*.site{i}.com")).Length == BrowserPolicyPlan.MaximumEntries,
+            "Subdomain trees must count as two patterns each, including all internal exceptions.");
+        Expect<InvalidDataException>(() => BrowserPolicyPlan.BuildAllowlist(Enumerable.Range(1, 499).Select(i => $"*.site{i}.com")));
+        using var fixture = new Fixture();
+        await fixture.Manager.ApplyAsync(["example.com"]);
+        await fixture.Manager.ApplyAsync(["*.example.com"]);
+        foreach (var path in BrowserPolicyManager.PolicyPaths.Where(path => path.EndsWith("URLAllowlist", StringComparison.Ordinal)))
+            Check(fixture.Registry.Read(path).Values.Contains("https://example.com")
+                && !fixture.Registry.Read(path).Values.Contains("https://.example.com"), "Both browsers must replace exact rules with subdomain rules.");
+        await fixture.Manager.ApplyAsync(["example.com"]);
+        foreach (var path in BrowserPolicyManager.PolicyPaths.Where(path => path.EndsWith("URLAllowlist", StringComparison.Ordinal)))
+            Check(!fixture.Registry.Read(path).Values.Contains("https://example.com")
+                && fixture.Registry.Read(path).Values.Contains("https://.example.com"), "Changing back must remove the broader permission.");
+        await fixture.Manager.ApplyAsync(["*.example.com"]);
+        await new BrowserPolicyManager(fixture.Registry, fixture.Journal).RemoveAsync();
+        Check(fixture.Registry.Values.Values.All(values => values.Count == 0) && !File.Exists(fixture.Journal),
+            "Subdomain policies must be removed on Stop after restart.");
     }
 
     public static async Task ExistingPolicies()

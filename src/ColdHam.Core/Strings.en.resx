@@ -427,7 +427,7 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>Duration must be a whole number between 1 and 1440 minutes.</value>
   </data>
   <data name="TheListExceedsTheChromeAndEdge" xml:space="preserve">
-    <value>The list exceeds the Chrome and Edge limit of 1000 patterns (up to 249 domains with www variants). Reduce the allowed websites.</value>
+    <value>The list exceeds the Chrome and Edge limit of 1000 patterns, including internal exceptions. Reduce the allowed websites.</value>
   </data>
   <data name="DamagedConfigurationPreservedAt" xml:space="preserve">
     <value>Damaged configuration preserved at {0}. </value>
@@ -559,13 +559,22 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>Block all websites except these (Chrome and Edge)</value>
   </data>
   <data name="DuringASessionOrActiveScheduleOnly" xml:space="preserve">
-    <value>During a session or active schedule, only these domains and their www variants are allowed. An empty list blocks all websites.</value>
+    <value>During a session or active schedule, only these entries are allowed. *.example.com includes the domain and all its subdomains; without *., only the domain and its www variant are included. An empty list blocks all websites.</value>
   </data>
   <data name="RestartChromeEdgeAfterEnablingOrStopping" xml:space="preserve">
     <value>Restart Chrome/Edge after enabling or stopping this mode. Other browsers and Edge profiles with personal Microsoft accounts are not covered.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
-    <value>Allowed domain, for example: example.com</value>
+    <value>Allowed domain: example.com. To include all its subdomains, select the checkbox or enter *.example.com.</value>
+  </data>
+  <data name="IncludeAllSubdomains" xml:space="preserve">
+    <value>Include all subdomains</value>
+  </data>
+  <data name="IncludeAllSubdomainsHelp" xml:space="preserve">
+    <value>Allows the main domain and its subdomains at any depth. For example, oaiusercontent.com includes files.oaiusercontent.com. Shown as *.oaiusercontent.com.</value>
+  </data>
+  <data name="InvalidAllowedDomainPattern" xml:space="preserve">
+    <value>Enter a domain or use *.example.com to allow it with all its subdomains. Other wildcards are not supported.</value>
   </data>
   <data name="NoAllowedWebsitesAddedYet" xml:space="preserve">
     <value>No allowed websites added yet.</value>
@@ -643,7 +652,7 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>Cold Ham blocks exact domains and their www variants using the Windows hosts file. It cannot filter specific paths, searches or all subdomains.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. It includes the domain and its www variant; add other subdomains separately. Restart the browser after changes and check policies at chrome://policy or edge://policy. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages remain available.</value>
+    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. When adding a domain, select Include all subdomains or enter *.example.com to allow its subdomains at any depth. Without that option, the domain and its www variant are allowed. It does not include other domains the site uses for images or files; add those separately. Restart the browser after changes and check policies at chrome://policy or edge://policy. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages and developer tools remain available.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham monitors configured processes while the application is open. When blocking starts, any matching application will be closed and unsaved work may be lost.</value>

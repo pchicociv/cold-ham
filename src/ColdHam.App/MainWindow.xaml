@@ -182,8 +182,15 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <TextBox x:Name="AllowedWebsiteInput" KeyDown="AllowedWebsiteInput_KeyDown" ToolTip="{DynamicResource AllowedDomainForExampleExampleCom}" />
                         <Button Grid.Column="1" Content="{DynamicResource Add}" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="AddAllowedWebsiteButton_Click" />
+                        <CheckBox x:Name="IncludeAllowedSubdomainsToggle" Grid.Row="1" Grid.ColumnSpan="2"
+                                  Content="{DynamicResource IncludeAllSubdomains}" Margin="0,8,0,0"
+                                  ToolTip="{DynamicResource IncludeAllSubdomainsHelp}" />
                     </Grid>
                     <Grid Grid.Row="2">
                         <ListBox x:Name="AllowedWebsiteList" Background="Transparent" BorderThickness="0">

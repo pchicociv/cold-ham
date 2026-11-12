@@ -6,11 +6,15 @@ public static class BrowserPolicyPlan
 
     public static string[] BuildAllowlist(IEnumerable<string> websites)
     {
-        // Preserve internal browser pages. Website exceptions cover only HTTP(S)
-        // and exact hosts; a leading dot disables implicit subdomain matching.
-        var patterns = new[] { "chrome://*", "edge://*", "chrome-untrusted://*" }
-            .Concat(WebsiteRules.ExpandDomains(websites)
-                .SelectMany(domain => new[] { $"http://.{domain}", $"https://.{domain}" }))
+        // Preserve internal browser pages, including the DevTools frontend, which
+        // uses its own scheme and would otherwise be blocked by URLBlocklist = *.
+        // Website exceptions cover only HTTP(S), with subdomains only when opted in.
+        var patterns = new[] { "chrome://*", "edge://*", "chrome-untrusted://*", "devtools://*" }
+            .Concat(websites.Select(AllowedWebsiteRule.Parse)
+                .SelectMany(rule => rule.BrowserHostFilters)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Order(StringComparer.OrdinalIgnoreCase)
+                .SelectMany(host => new[] { $"http://{host}", $"https://{host}" }))
             .ToArray();
         if (patterns.Length > MaximumEntries)
             throw new InvalidDataException(LocalizedText.Get("TheListExceedsTheChromeAndEdge"));

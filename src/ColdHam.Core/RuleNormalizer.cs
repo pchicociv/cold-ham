@@ -70,6 +70,33 @@ public static partial class RuleNormalizer
         return true;
     }
 
+    public static bool TryNormalizeAllowedDomain(string? input, out string normalized, out string error,
+        bool includeSubdomains = false)
+    {
+        var value = input?.Trim() ?? string.Empty;
+        if (value.StartsWith("*.", StringComparison.Ordinal))
+        {
+            includeSubdomains = true;
+            value = value[2..];
+            // The wildcard form accepts a domain only, never a URL or credentials.
+            if (value.IndexOfAny(['/', '\\', ':', '?', '#', '@']) >= 0)
+            {
+                normalized = string.Empty;
+                error = LocalizedText.Get("InvalidAllowedDomainPattern");
+                return false;
+            }
+        }
+        if (value.Contains('*'))
+        {
+            normalized = string.Empty;
+            error = LocalizedText.Get("InvalidAllowedDomainPattern");
+            return false;
+        }
+        if (!TryNormalizeDomain(value, out normalized, out error)) return false;
+        if (includeSubdomains) normalized = "*." + normalized;
+        return true;
+    }
+
     public static bool TryNormalizeApplication(string? input, out string normalized, out string error)
     {
         normalized = string.Empty;

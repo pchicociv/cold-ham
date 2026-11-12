@@ -8,7 +8,7 @@
     <RootNamespace>ColdHam.App</RootNamespace>
     <StartupObject>ColdHam.App.App</StartupObject>
     <ApplicationIcon>Assets/ColdHam.ico</ApplicationIcon>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <UpdateRepositoryUrl Condition="'$(UpdateRepositoryUrl)' == ''">https://github.com/pchicociv/cold-ham</UpdateRepositoryUrl>
   </PropertyGroup>
   <ItemGroup>

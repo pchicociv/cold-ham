@@ -43,13 +43,17 @@ Closing the window hides Cold Ham in the system tray while enforcement continues
 
 ### Websites
 
-Standard website blocking manages only the section between `# Cold Ham BEGIN` and `# Cold Ham END` in the Windows hosts file. Unrelated content is preserved. Allowed domains take priority over matching blocked domains within Cold Ham's rules.
+Standard website blocking manages only the section between `# Cold Ham BEGIN` and `# Cold Ham END` in the Windows hosts file. Unrelated content is preserved. The Allowed list is used when **Allowed websites only** mode is enabled.
 
-Rules cover exact domains and their `www` variants. Add other subdomains separately. Hosts-file blocking does not filter individual URL paths, searches, or every subdomain automatically.
+Blocked rules cover exact domains and their `www` variants. Add other subdomains separately. Hosts-file blocking does not filter individual URL paths, searches, or every subdomain automatically.
 
 **Allowed websites only** replaces the blocked website list with Chrome and Edge policies during an active session or schedule. An empty allowed list blocks all website navigation covered by those policies. Restart the browser after applying or removing policies, and inspect `chrome://policy` or `edge://policy` if necessary.
 
-This mode does not cover other browsers, other applications, or Edge profiles using personal Microsoft accounts. Internal browser pages remain available. Cold Ham refuses conflicting existing browser URL policies and removes only policy values it owns.
+In **Allowed**, select **Include all subdomains** before adding a domain, or enter `*.example.com`. This allows the main domain and all nested subdomains, such as `files.example.com` and `a.b.example.com`. Without the option, entries keep allowing only the exact domain and its `www` variant. Existing entries keep their previous scope. To broaden an existing entry, add it again with the option selected; remove the exact entry if it is no longer needed. Other domains used by a site still need their own entries: `*.chatgpt.com` does not include `*.oaiusercontent.com` or `*.oaistatic.com`.
+
+Settings use version 4 to preserve this distinction. Earlier settings migrate without expanding permissions; older app versions cannot read the new settings format.
+
+This mode does not cover other browsers, other applications, or Edge profiles using personal Microsoft accounts. Internal browser pages and developer tools remain available; Cold Ham includes a `devtools://*` exception so its global URL block does not block the developer tools frontend. Separate organization policies can still restrict developer tools. Cold Ham refuses conflicting existing browser URL policies and removes only policy values it owns.
 
 ### Applications
 
