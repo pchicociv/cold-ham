@@ -562,7 +562,7 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>Durante una sesión o un horario activo, solo se permiten estas entradas. *.example.com incluye el dominio y todos sus subdominios; sin *., se incluye solo el dominio y su variante www. Una lista vacía bloquea todos los sitios.</value>
   </data>
   <data name="ReloadBrowserPoliciesHelp" xml:space="preserve">
-    <value>Para actualizar las reglas sin cerrar el navegador: abre las políticas, pulsa Volver a cargar las políticas y recarga la pestaña afectada.</value>
+    <value>Para actualizar las reglas sin cerrar el navegador: copia la dirección, pégala en la barra de direcciones del navegador y pulsa Intro. Allí pulsa Volver a cargar las políticas y recarga la pestaña afectada.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
     <value>Dominio permitido: example.com. Para incluir todos sus subdominios, marca la casilla o escribe *.example.com.</value>
@@ -652,7 +652,7 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Al añadir un dominio, marca Incluir todos los subdominios o escribe *.example.com para permitir también sus subdominios de cualquier nivel. Sin esa opción, se permite el dominio y su variante www. No incluye otros dominios que el sitio utilice para imágenes o archivos; añádelos por separado. Tras los cambios, usa Abrir políticas de Chrome o Edge en Permitidos, pulsa Volver a cargar las políticas y recarga la pestaña afectada. No hace falta cerrar el navegador para la recarga normal. Comprueba URLBlocklist y URLAllowlist: escribir las reglas no verifica que el navegador las haya leído. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas y las herramientas de desarrollador del navegador siguen disponibles.</value>
+    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Al añadir un dominio, marca Incluir todos los subdominios o escribe *.example.com para permitir también sus subdominios de cualquier nivel. Sin esa opción, se permite el dominio y su variante www. No incluye otros dominios que el sitio utilice para imágenes o archivos; añádelos por separado. Tras los cambios, copia chrome://policy o edge://policy desde Permitidos y pega la dirección en el navegador correspondiente. Pulsa Intro, después Volver a cargar las políticas y recarga la pestaña afectada. No hace falta cerrar el navegador para la recarga normal. Comprueba URLBlocklist y URLAllowlist: escribir las reglas no verifica que el navegador las haya leído. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas y las herramientas de desarrollador del navegador siguen disponibles.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham vigila los procesos configurados mientras la aplicación está abierta. Al iniciar un bloqueo, cualquier aplicación coincidente se cerrará y podría perder trabajo sin guardar.</value>
@@ -873,7 +873,7 @@ El cambio se aplicará también a los bloqueos activos.</value>
     <value>No hay diario de políticas pendiente.</value>
   </data>
   <data name="DiagnosticNextSteps" xml:space="preserve">
-    <value>Abre las políticas de Chrome o Edge con los botones de arriba y pulsa Volver a cargar las políticas. Revisa URLBlocklist y URLAllowlist, su estado y su origen; después recarga la pestaña afectada. Prueba un sitio permitido y otro bloqueado. Si no se actualizan, revisa los conflictos antes de recurrir al reinicio del navegador. Para un conflicto ajeno, consulta a quien administre esas políticas.</value>
+    <value>Copia la dirección con el botón de Chrome o Edge, pégala en la barra de direcciones de ese navegador y pulsa Intro. Allí pulsa Volver a cargar las políticas. Revisa URLBlocklist y URLAllowlist, su estado y su origen; después recarga la pestaña afectada. Prueba un sitio permitido y otro bloqueado. Si no se actualizan, revisa los conflictos antes de recurrir al reinicio del navegador. Para un conflicto ajeno, consulta a quien administre esas políticas.</value>
   </data>
   <data name="DiagnosticLimits" xml:space="preserve">
     <value>Este informe no comprueba navegación, caché DNS, políticas de nube/perfil ni políticas específicas de DevTools. Otros navegadores y perfiles de Edge con cuenta Microsoft personal quedan fuera de Solo sitios permitidos. La vigilancia de aplicaciones y sus errores se muestran en la cabecera.</value>
@@ -960,16 +960,17 @@ Se permitirán el dominio exacto y su variante www, sin otros subdominios. Solo 
     <value>URL aportada; fallo sin verificar</value>
   </data>
   <data name="DiagnosticLoadFailed" xml:space="preserve"><value>No se ha cargado la configuración. Las comparaciones usan el estado provisional y no confirman qué reglas deberían estar activas. Revisa el error de carga antes de reintentar.</value></data>
-  <data name="OpenChromePolicies" xml:space="preserve">
-    <value>Abrir políticas de Chrome</value>
+  <data name="CopyChromePolicyAddress" xml:space="preserve">
+    <value>Copiar chrome://policy</value>
   </data>
-  <data name="OpenEdgePolicies" xml:space="preserve">
-    <value>Abrir políticas de Edge</value>
+  <data name="CopyEdgePolicyAddress" xml:space="preserve">
+    <value>Copiar edge://policy</value>
   </data>
   <data name="BrowserPolicyReloadSteps" xml:space="preserve">
-    <value>Abre la página de políticas sin cerrar las pestañas. Allí pulsa Volver a cargar las políticas (Reload policies) y después recarga la pestaña afectada. Este botón solo abre la página.</value>
+    <value>Copia la dirección de políticas. Pégala en la barra de direcciones del navegador correspondiente, pulsa Intro y después Volver a cargar las políticas. No abre ni reinicia el navegador.</value>
   </data>
-  <data name="BrowserPolicyOpenFailed" xml:space="preserve">
-    <value>No se pudo abrir {0}. Abre {1} en ese navegador, pulsa Volver a cargar las políticas (Reload policies) y recarga la pestaña afectada.</value>
-  </data>
+  <data name="BrowserPolicyChromeCopied" xml:space="preserve"><value>Copiado: chrome://policy. Pégalo en la barra de direcciones de Chrome y pulsa Intro.</value></data>
+  <data name="BrowserPolicyEdgeCopied" xml:space="preserve"><value>Copiado: edge://policy. Pégalo en la barra de direcciones de Edge y pulsa Intro.</value></data>
+  <data name="BrowserPolicyChromeCopyFailed" xml:space="preserve"><value>No se pudo copiar la dirección. Escribe chrome://policy en la barra de direcciones de Chrome y pulsa Intro.</value></data>
+  <data name="BrowserPolicyEdgeCopyFailed" xml:space="preserve"><value>No se pudo copiar la dirección. Escribe edge://policy en la barra de direcciones de Edge y pulsa Intro.</value></data>
 </root>

@@ -176,9 +176,10 @@
                             <TextBlock Text="{DynamicResource ReloadBrowserPoliciesHelp}"
                                        TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
                             <WrapPanel Margin="0,6,0,0">
-                                <Button Content="{DynamicResource OpenChromePolicies}" Tag="Chrome" Click="OpenBrowserPolicies_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
-                                <Button Content="{DynamicResource OpenEdgePolicies}" Tag="Edge" Click="OpenBrowserPolicies_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
+                                <Button Content="{DynamicResource CopyChromePolicyAddress}" Tag="Chrome" Click="CopyBrowserPolicyAddress_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
+                                <Button Content="{DynamicResource CopyEdgePolicyAddress}" Tag="Edge" Click="CopyBrowserPolicyAddress_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
                             </WrapPanel>
+                            <TextBlock x:Name="AllowedPolicyCopyStatus" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite"/>
                         </StackPanel>
                         <TextBlock x:Name="AllowedWebsiteCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
                     </Grid>
@@ -334,14 +335,15 @@
                 <TabControl Margin="12">
                     <TabItem Header="{DynamicResource DiagnosticStateTab}">
                         <Grid Margin="12">
-                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                             <TextBlock Text="{DynamicResource DiagnosticIntro}" TextWrapping="Wrap" Margin="0,0,0,8"/>
                             <WrapPanel Grid.Row="1" Margin="0,0,0,10">
                                 <Button x:Name="RefreshDiagnosticButton" Content="{DynamicResource DiagnosticRefresh}" Click="RefreshDiagnostic_Click"/>
-                                <Button Content="{DynamicResource OpenChromePolicies}" Tag="Chrome" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="OpenBrowserPolicies_Click"/>
-                                <Button Content="{DynamicResource OpenEdgePolicies}" Tag="Edge" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="OpenBrowserPolicies_Click"/>
+                                <Button Content="{DynamicResource CopyChromePolicyAddress}" Tag="Chrome" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="CopyBrowserPolicyAddress_Click"/>
+                                <Button Content="{DynamicResource CopyEdgePolicyAddress}" Tag="Edge" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="CopyBrowserPolicyAddress_Click"/>
                             </WrapPanel>
-                            <TextBox x:Name="DiagnosticReport" Grid.Row="2" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                            <TextBlock x:Name="DiagnosticPolicyCopyStatus" Grid.Row="2" TextWrapping="Wrap" Margin="0,0,0,6" AutomationProperties.LiveSetting="Polite"/>
+                            <TextBox x:Name="DiagnosticReport" Grid.Row="3" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                                      Text="{DynamicResource DiagnosticRefreshNeeded}" AutomationProperties.Name="{DynamicResource DiagnosticStateTab}"/>
                         </Grid>
                     </TabItem>

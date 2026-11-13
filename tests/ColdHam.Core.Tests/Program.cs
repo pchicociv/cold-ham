@@ -3,7 +3,6 @@ using ColdHam.Windows;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
-    ("opens policy pages in the selected browser without restart or shell dispatch", BrowserPolicyPageTests.LaunchPlan),
     ("edits rules atomically with validation and policy limits", TroubleshootingTests.Editing),
     ("analyzes resource URLs and HAR locally without retaining sensitive URL data", TroubleshootingTests.Resources),
     ("persists edited rules and inspects hosts without mutation", TroubleshootingTests.PersistenceAndHosts),

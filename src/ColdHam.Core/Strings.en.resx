@@ -562,7 +562,7 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>During a session or active schedule, only these entries are allowed. *.example.com includes the domain and all its subdomains; without *., only the domain and its www variant are included. An empty list blocks all websites.</value>
   </data>
   <data name="ReloadBrowserPoliciesHelp" xml:space="preserve">
-    <value>To update rules without closing the browser: open policies, click Reload policies, then reload the affected tab.</value>
+    <value>To update rules without closing the browser: copy the address, paste it into the browser address bar and press Enter. Click Reload policies there, then reload the affected tab.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
     <value>Allowed domain: example.com. To include all its subdomains, select the checkbox or enter *.example.com.</value>
@@ -652,7 +652,7 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>Cold Ham blocks exact domains and their www variants using the Windows hosts file. It cannot filter specific paths, searches or all subdomains.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. When adding a domain, select Include all subdomains or enter *.example.com to allow its subdomains at any depth. Without that option, the domain and its www variant are allowed. It does not include other domains the site uses for images or files; add those separately. After changes, use Open Chrome or Edge policies in Allowed, click Reload policies and reload the affected tab. Normal policy reloads do not require closing the browser. Check URLBlocklist and URLAllowlist: writing rules does not verify that the browser has read them. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages and developer tools remain available.</value>
+    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. When adding a domain, select Include all subdomains or enter *.example.com to allow its subdomains at any depth. Without that option, the domain and its www variant are allowed. It does not include other domains the site uses for images or files; add those separately. After changes, copy chrome://policy or edge://policy from Allowed and paste the address into the corresponding browser. Press Enter, then click Reload policies and reload the affected tab. Normal policy reloads do not require closing the browser. Check URLBlocklist and URLAllowlist: writing rules does not verify that the browser has read them. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages and developer tools remain available.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham monitors configured processes while the application is open. When blocking starts, any matching application will be closed and unsaved work may be lost.</value>
@@ -873,7 +873,7 @@ The change will also apply to active blocks.</value>
     <value>No policy journal remains.</value>
   </data>
   <data name="DiagnosticNextSteps" xml:space="preserve">
-    <value>Open Chrome or Edge policies using the buttons above and click Reload policies. Inspect URLBlocklist and URLAllowlist, their status and source, then reload the affected tab. Try an allowed and a blocked site. If policies do not update, check conflicts before resorting to a browser restart. For external conflicts, contact whoever manages those policies.</value>
+    <value>Copy the address with the Chrome or Edge button, paste it into that browser&apos;s address bar and press Enter. Click Reload policies there. Inspect URLBlocklist and URLAllowlist, their status and source, then reload the affected tab. Try an allowed and a blocked site. If policies do not update, check conflicts before resorting to a browser restart. For external conflicts, contact whoever manages those policies.</value>
   </data>
   <data name="DiagnosticLimits" xml:space="preserve">
     <value>This report does not test browsing, DNS cache, cloud/profile policies or DevTools-specific policies. Other browsers and Edge profiles with personal Microsoft accounts are outside Allowed websites only. Application monitoring and its errors are shown in the header.</value>
@@ -960,16 +960,17 @@ The exact domain and its www variant will be allowed, without other subdomains. 
     <value>supplied URL; failure not verified</value>
   </data>
   <data name="DiagnosticLoadFailed" xml:space="preserve"><value>Settings could not be loaded. Comparisons use provisional state and cannot confirm which rules should be active. Review the load error before retrying.</value></data>
-  <data name="OpenChromePolicies" xml:space="preserve">
-    <value>Open Chrome policies</value>
+  <data name="CopyChromePolicyAddress" xml:space="preserve">
+    <value>Copy chrome://policy</value>
   </data>
-  <data name="OpenEdgePolicies" xml:space="preserve">
-    <value>Open Edge policies</value>
+  <data name="CopyEdgePolicyAddress" xml:space="preserve">
+    <value>Copy edge://policy</value>
   </data>
   <data name="BrowserPolicyReloadSteps" xml:space="preserve">
-    <value>Opens the policy page without closing tabs. Click Reload policies there, then reload the affected tab. This button only opens the page.</value>
+    <value>Copies the policy address. Paste it into the corresponding browser address bar, press Enter and then click Reload policies. Does not open or restart the browser.</value>
   </data>
-  <data name="BrowserPolicyOpenFailed" xml:space="preserve">
-    <value>Could not open {0}. Open {1} in that browser, click Reload policies, then reload the affected tab.</value>
-  </data>
+  <data name="BrowserPolicyChromeCopied" xml:space="preserve"><value>Copied: chrome://policy. Paste it into Chrome&apos;s address bar and press Enter.</value></data>
+  <data name="BrowserPolicyEdgeCopied" xml:space="preserve"><value>Copied: edge://policy. Paste it into Edge&apos;s address bar and press Enter.</value></data>
+  <data name="BrowserPolicyChromeCopyFailed" xml:space="preserve"><value>Could not copy the address. Type chrome://policy into Chrome&apos;s address bar and press Enter.</value></data>
+  <data name="BrowserPolicyEdgeCopyFailed" xml:space="preserve"><value>Could not copy the address. Type edge://policy into Edge&apos;s address bar and press Enter.</value></data>
 </root>
