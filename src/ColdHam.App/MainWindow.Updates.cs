@@ -55,12 +55,13 @@ public partial class MainWindow
     private bool CanRestartForUpdate()
     {
         var unsaved = WebsiteInput.Text.Length > 0 || AllowedWebsiteInput.Text.Length > 0 || ApplicationInput.Text.Length > 0
+            || ResourceUrls.Text.Length > 0 || _resourceAnalysis is not null
             || !TryReadSchedule(out var schedule, out _)
             || schedule.Enabled != _configuration.Schedule.Enabled
             || schedule.Start != _configuration.Schedule.Start || schedule.End != _configuration.Schedule.End
             || !schedule.Days.ToHashSet().SetEquals(_configuration.Schedule.Days);
         return UpdateRestartPolicy.CanRestart(_configuration, _clock, new UpdateSafetyState(
-            Busy: _loading || _saving || _applying || !IsEnabled,
+            Busy: _loading || _saving || _applying || _resourceBusy || _diagnosing || !IsEnabled,
             EnforcementActive: _effectiveActive,
             WebRulesRemoved: _appliedWebRules == string.Empty,
             HasErrors: _loadFailed || _configurationError is not null || _hostsError is not null

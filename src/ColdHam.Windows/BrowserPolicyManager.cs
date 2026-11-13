@@ -77,6 +77,33 @@ public sealed class BrowserPolicyManager
         finally { _gate.Release(); }
     }
 
+    /// <summary>Reads a snapshot only; never repairs policies or removes the recovery journal.</summary>
+    public async Task<BrowserPolicyInspection> InspectAsync(bool expectActive, IEnumerable<string> allowedWebsites)
+    {
+        var allowlist = expectActive ? BrowserPolicyPlan.BuildAllowlist(allowedWebsites) : [];
+        await _gate.WaitAsync();
+        try
+        {
+            var journal = await ReadJournalAsync();
+            var entries = new List<BrowserPolicyEntryInspection>();
+            foreach (var path in PolicyPaths)
+            {
+                var current = _registry.Read(path);
+                var owned = journal.GetValueOrDefault(path) ?? [];
+                var machine = _registry.HasMachinePolicy(path);
+                var foreign = current.Count(pair => !owned.TryGetValue(pair.Key, out var value) || !Equals(value, pair.Value));
+                var expected = !expectActive ? [] : path.EndsWith("URLBlocklist", StringComparison.Ordinal) ? new[] { "*" } : allowlist;
+                // Compare semantics: registry numbering/order is not part of the URL policy.
+                var matches = current.Count == expected.Length
+                    && current.Values.All(value => value is string)
+                    && current.Values.Cast<string>().Order(StringComparer.Ordinal).SequenceEqual(expected.Order(StringComparer.Ordinal));
+                entries.Add(new(path, current.Count, foreign, machine, matches));
+            }
+            return new(entries.ToArray(), File.Exists(_journalPath));
+        }
+        finally { _gate.Release(); }
+    }
+
     private Task RemoveOwnedAsync(Dictionary<string, Dictionary<string, string>> journal)
     {
         var conflicts = new List<string>();
@@ -130,6 +157,9 @@ public sealed class BrowserPolicyManager
     private static InvalidOperationException Conflict(string path) => new(
         LocalizedText.Format("BrowserPoliciesNotOwnedByColdHam", path));
 }
+
+public sealed record BrowserPolicyEntryInspection(string Path, int ValueCount, int ForeignValues, bool MachinePolicy, bool MatchesExpected);
+public sealed record BrowserPolicyInspection(BrowserPolicyEntryInspection[] Entries, bool RecoveryJournalPresent);
 
 public interface IBrowserPolicyRegistry
 {

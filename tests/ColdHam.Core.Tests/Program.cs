@@ -3,6 +3,11 @@ using ColdHam.Windows;
 
 var tests = new (string Name, Func<Task> Run)[]
 {
+    ("opens policy pages in the selected browser without restart or shell dispatch", BrowserPolicyPageTests.LaunchPlan),
+    ("edits rules atomically with validation and policy limits", TroubleshootingTests.Editing),
+    ("analyzes resource URLs and HAR locally without retaining sensitive URL data", TroubleshootingTests.Resources),
+    ("persists edited rules and inspects hosts without mutation", TroubleshootingTests.PersistenceAndHosts),
+    ("inspects owned and conflicting browser policies without mutation", BrowserPolicyTests.Inspection),
     ("applies and consumes installation language without losing settings", LocalizationTests.InstallationLanguage),
     ("keeps installation language pending when persistence fails", LocalizationTests.InstallationLanguageRetry),
     ("defers updates until sessions, recovery and edits are settled", UpdateTests.RestartSafety),

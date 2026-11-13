@@ -55,6 +55,14 @@
             <Setter Property="MinHeight" Value="26" />
         </Style>
 
+        <Style x:Key="InlineEditButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Content" Value="{DynamicResource RuleEdit}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="MinHeight" Value="26" />
+        </Style>
+
         <Style TargetType="TextBox">
             <Setter Property="Padding" Value="9,6" />
             <Setter Property="MinHeight" Value="34" />

@@ -31,6 +31,27 @@ public sealed class HostsFileManager
 
     public Task RemoveAsync(CancellationToken cancellationToken = default) => UpdateAsync(RemoveManagedSection, cancellationToken);
 
+    public async Task<HostsInspection> InspectAsync(IEnumerable<string> expectedDomains, CancellationToken cancellationToken = default)
+    {
+        var domains = expectedDomains.ToArray();
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var bytes = await File.ReadAllBytesAsync(HostsPath, cancellationToken);
+            var (encoding, preamble) = DetectEncoding(bytes);
+            var content = encoding.GetString(bytes, preamble, bytes.Length - preamble);
+            var range = FindManagedSection(content);
+            var outside = RemoveManagedSection(content);
+            var externalMappings = outside.Split('\n').Count(line =>
+            {
+                var fields = line.Split('#')[0].Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+                return fields.Length > 1 && System.Net.IPAddress.TryParse(fields[0], out _);
+            });
+            return new(range is not null, BuildContent(content, domains) == content, externalMappings);
+        }
+        finally { _gate.Release(); }
+    }
+
     private async Task UpdateAsync(Func<string, string> transform, CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -172,3 +193,5 @@ public sealed class HostsFileManager
         }
     }
 }
+
+public sealed record HostsInspection(bool ManagedSectionPresent, bool MatchesExpected, int ExternalMappingLines);

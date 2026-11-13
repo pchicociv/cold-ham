@@ -87,7 +87,7 @@
     <value>Sitio permitido añadido: {0}</value>
   </data>
   <data name="DuringASessionOrActiveScheduleWebsites" xml:space="preserve">
-    <value>Durante una sesión o un horario activo se bloquearán los sitios no permitidos en Chrome y Edge. Una lista vacía bloquea todos los sitios. Otros navegadores y los perfiles personales de Microsoft en Edge quedan fuera de este modo. Reinicia el navegador para cargar o retirar las políticas. ¿Activar este modo?</value>
+    <value>Durante una sesión o un horario activo se bloquearán los sitios no permitidos en Chrome y Edge. Una lista vacía bloquea todos los sitios. Otros navegadores y los perfiles personales de Microsoft en Edge quedan fuera de este modo. Para actualizar las reglas sin cerrar el navegador, abre su página de políticas, pulsa Volver a cargar las políticas y recarga las pestañas afectadas. ¿Activar este modo?</value>
   </data>
   <data name="AllowedWebsitesOnly" xml:space="preserve">
     <value>Solo sitios permitidos</value>
@@ -141,13 +141,13 @@
     <value>La sesión ha terminado; el horario puede mantener el bloqueo activo.</value>
   </data>
   <data name="AllowOnlyPoliciesWrittenForChromeAnd" xml:space="preserve">
-    <value>Políticas de solo permitidos escritas para Chrome y Edge. Reinicia el navegador y comprueba chrome://policy o edge://policy.</value>
+    <value>Reglas de solo permitidos escritas para Chrome y Edge. Para usarlas ya, pulsa Volver a cargar las políticas en chrome://policy o edge://policy y recarga la pestaña afectada.</value>
   </data>
   <data name="WroteWebRuleSToHosts" xml:space="preserve">
     <value>Se escribieron {0} regla(s) web en hosts.</value>
   </data>
   <data name="RemovalOfColdHamWebRulesVerified" xml:space="preserve">
-    <value>Se verificó la retirada de las reglas web de Cold Ham. Reinicia el navegador si usaste Solo sitios permitidos.</value>
+    <value>Se verificó la retirada de las reglas web de Cold Ham. Si usaste Solo sitios permitidos, recarga las políticas del navegador y las pestañas afectadas.</value>
   </data>
   <data name="CouldNotApplyOrRemoveWebRules" xml:space="preserve">
     <value>No se pudieron aplicar o retirar las reglas web. Si faltan permisos de hosts, reinicia como administrador y pulsa Reintentar. Si las políticas están administradas por tu organización, consulta a su administrador.</value>
@@ -258,14 +258,14 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
   <data name="NotChecked" xml:space="preserve">
     <value>sin comprobar</value>
   </data>
-  <data name="AllowedOnlyPoliciesWrittenRestartChromeEdge" xml:space="preserve">
-    <value>solo permitidos: políticas escritas; reinicia Chrome/Edge</value>
+  <data name="AllowedOnlyPoliciesWrittenReloadBrowser" xml:space="preserve">
+    <value>solo permitidos: reglas escritas; recarga las políticas desde Permitidos y después la pestaña</value>
   </data>
   <data name="RulesWrittenToHosts" xml:space="preserve">
     <value>reglas escritas en hosts</value>
   </data>
-  <data name="NoActiveRulesRestartTheBrowserIf" xml:space="preserve">
-    <value>sin reglas activas; reinicia el navegador si usaste Solo permitidos</value>
+  <data name="NoActiveRulesReloadBrowserIfNeeded" xml:space="preserve">
+    <value>sin reglas activas; si quedan bloqueos, recarga políticas y pestaña</value>
   </data>
   <data name="ApplicationsStatusPrefix" xml:space="preserve">
     <value> · Aplicaciones: </value>
@@ -561,8 +561,8 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
   <data name="DuringASessionOrActiveScheduleOnly" xml:space="preserve">
     <value>Durante una sesión o un horario activo, solo se permiten estas entradas. *.example.com incluye el dominio y todos sus subdominios; sin *., se incluye solo el dominio y su variante www. Una lista vacía bloquea todos los sitios.</value>
   </data>
-  <data name="RestartChromeEdgeAfterEnablingOrStopping" xml:space="preserve">
-    <value>Reinicia Chrome/Edge tras activar o detener este modo. No cubre otros navegadores ni perfiles de Edge con cuenta Microsoft personal.</value>
+  <data name="ReloadBrowserPoliciesHelp" xml:space="preserve">
+    <value>Para actualizar las reglas sin cerrar el navegador: abre las políticas, pulsa Volver a cargar las políticas y recarga la pestaña afectada.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
     <value>Dominio permitido: example.com. Para incluir todos sus subdominios, marca la casilla o escribe *.example.com.</value>
@@ -652,7 +652,7 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
     <value>Cold Ham bloquea dominios exactos y sus variantes www mediante el archivo hosts de Windows. No puede filtrar rutas concretas, búsquedas ni todos los subdominios.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Al añadir un dominio, marca Incluir todos los subdominios o escribe *.example.com para permitir también sus subdominios de cualquier nivel. Sin esa opción, se permite el dominio y su variante www. No incluye otros dominios que el sitio utilice para imágenes o archivos; añádelos por separado. Reinicia el navegador tras los cambios y comprueba las políticas en chrome://policy o edge://policy. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas y las herramientas de desarrollador del navegador siguen disponibles.</value>
+    <value>En Permitidos puedes activar Solo sitios permitidos para Chrome y Edge: bloquea los demás sitios y sustituye la lista de sitios bloqueados durante la sesión o el horario. Al añadir un dominio, marca Incluir todos los subdominios o escribe *.example.com para permitir también sus subdominios de cualquier nivel. Sin esa opción, se permite el dominio y su variante www. No incluye otros dominios que el sitio utilice para imágenes o archivos; añádelos por separado. Tras los cambios, usa Abrir políticas de Chrome o Edge en Permitidos, pulsa Volver a cargar las políticas y recarga la pestaña afectada. No hace falta cerrar el navegador para la recarga normal. Comprueba URLBlocklist y URLAllowlist: escribir las reglas no verifica que el navegador las haya leído. No cubre otros navegadores, aplicaciones ni perfiles de Edge con cuenta Microsoft personal. Las políticas existentes de otras herramientas no se sobrescriben. Las páginas internas y las herramientas de desarrollador del navegador siguen disponibles.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham vigila los procesos configurados mientras la aplicación está abierta. Al iniciar un bloqueo, cualquier aplicación coincidente se cerrará y podría perder trabajo sin guardar.</value>
@@ -755,5 +755,221 @@ Guarda tu trabajo antes de continuar. ¿Autorizas estos cierres? Si eliges No, l
   </data>
   <data name="UpdateWaiting" xml:space="preserve">
     <value>En espera: termina los bloqueos, resuelve los avisos y guarda o borra los campos pendientes. No se reinicia cerca del próximo horario.</value>
+  </data>
+  <data name="RuleEdit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="RuleEditTitle" xml:space="preserve">
+    <value>Editar regla</value>
+  </data>
+  <data name="RuleEditValue" xml:space="preserve">
+    <value>Dominio o ejecutable</value>
+  </data>
+  <data name="RuleEditSave" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="RuleEditCancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="RuleEditWebsitePrompt" xml:space="preserve">
+    <value>Modifica el dominio. El cambio se aplicará a la sesión activa tras guardarlo.</value>
+  </data>
+  <data name="RuleEditApplicationPrompt" xml:space="preserve">
+    <value>Modifica el nombre o la ruta del ejecutable. Los cierres requieren autorización.</value>
+  </data>
+  <data name="RuleEditDuplicate" xml:space="preserve">
+    <value>Ya existe otra entrada con esa regla.</value>
+  </data>
+  <data name="RuleEditConfirm" xml:space="preserve">
+    <value>¿Sustituir esta regla?
+
+{0}
+→ {1}
+
+El cambio se aplicará también a los bloqueos activos.</value>
+  </data>
+  <data name="RuleEditApplied" xml:space="preserve">
+    <value>Regla modificada: {0} → {1}</value>
+  </data>
+  <data name="DiagnosticsTitle" xml:space="preserve">
+    <value>Diagnóstico</value>
+  </data>
+  <data name="DiagnosticStateTab" xml:space="preserve">
+    <value>Estado del bloqueo</value>
+  </data>
+  <data name="DiagnosticIntro" xml:space="preserve">
+    <value>Comprueba los archivos y las políticas locales sin cambiarlos. Una regla escrita no demuestra que el navegador ya la haya cargado.</value>
+  </data>
+  <data name="DiagnosticRefresh" xml:space="preserve">
+    <value>Comprobar ahora</value>
+  </data>
+  <data name="DiagnosticRefreshNeeded" xml:space="preserve">
+    <value>Pulsa «Comprobar ahora» para obtener un diagnóstico actual. Los cambios en las reglas o en la sesión invalidan el informe anterior.</value>
+  </data>
+  <data name="DiagnosticTime" xml:space="preserve">
+    <value>Comprobación: {0} (instantánea; pulsa de nuevo para actualizar).</value>
+  </data>
+  <data name="DiagnosticActive" xml:space="preserve">
+    <value>Sesión u horario activo: se esperan reglas de bloqueo.</value>
+  </data>
+  <data name="DiagnosticInactive" xml:space="preserve">
+    <value>Sin sesión ni horario activo: no se esperan reglas de Cold Ham.</value>
+  </data>
+  <data name="DiagnosticSaved" xml:space="preserve">
+    <value>Configuración en memoria: sin errores de guardado conocidos.</value>
+  </data>
+  <data name="DiagnosticSaveFailed" xml:space="preserve">
+    <value>Hay cambios sin confirmar en disco. Revisa el error de guardado y pulsa Reintentar.</value>
+  </data>
+  <data name="DiagnosticHosts" xml:space="preserve">
+    <value>Archivo hosts: {0}</value>
+  </data>
+  <data name="DiagnosticHostsMatch" xml:space="preserve">
+    <value>La sección propia coincide con las reglas esperadas.</value>
+  </data>
+  <data name="DiagnosticHostsMismatch" xml:space="preserve">
+    <value>La sección propia no coincide. Pulsa Reintentar; si falta permiso, reinicia Cold Ham como administrador.</value>
+  </data>
+  <data name="DiagnosticHostsPresent" xml:space="preserve">
+    <value>La sección de Cold Ham está presente.</value>
+  </data>
+  <data name="DiagnosticHostsAbsent" xml:space="preserve">
+    <value>La sección de Cold Ham está ausente.</value>
+  </data>
+  <data name="DiagnosticExternalHosts" xml:space="preserve">
+    <value>Otras líneas de asignación en hosts: {0}. No se modifican; podrían afectar a sitios permitidos.</value>
+  </data>
+  <data name="DiagnosticReadFailed" xml:space="preserve">
+    <value>No se pudo comprobar {0}: {1}</value>
+  </data>
+  <data name="DiagnosticPolicyConflict" xml:space="preserve">
+    <value>Hay políticas ajenas o de equipo. Cold Ham no las sobrescribe.</value>
+  </data>
+  <data name="DiagnosticPolicyWritten" xml:space="preserve">
+    <value>Reglas propias escritas y coincidentes; carga en el navegador no comprobada.</value>
+  </data>
+  <data name="DiagnosticPolicyAbsent" xml:space="preserve">
+    <value>Sin valores URL de usuario; no se esperan reglas propias.</value>
+  </data>
+  <data name="DiagnosticPolicyMismatch" xml:space="preserve">
+    <value>Faltan reglas o difieren de las esperadas. Pulsa Reintentar.</value>
+  </data>
+  <data name="DiagnosticPolicyCounts" xml:space="preserve">
+    <value>Valores de usuario: {0}; ajenos o modificados: {1}; política URL de equipo: {2}.</value>
+  </data>
+  <data name="DiagnosticYes" xml:space="preserve">
+    <value>sí</value>
+  </data>
+  <data name="DiagnosticNo" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="DiagnosticJournalActive" xml:space="preserve">
+    <value>Diario de propiedad presente: permite retirar las políticas de la sesión.</value>
+  </data>
+  <data name="DiagnosticJournalPending" xml:space="preserve">
+    <value>Queda un diario de propiedad sin bloqueo esperado. Pulsa Reintentar para completar la retirada.</value>
+  </data>
+  <data name="DiagnosticJournalAbsent" xml:space="preserve">
+    <value>No hay diario de políticas pendiente.</value>
+  </data>
+  <data name="DiagnosticNextSteps" xml:space="preserve">
+    <value>Abre las políticas de Chrome o Edge con los botones de arriba y pulsa Volver a cargar las políticas. Revisa URLBlocklist y URLAllowlist, su estado y su origen; después recarga la pestaña afectada. Prueba un sitio permitido y otro bloqueado. Si no se actualizan, revisa los conflictos antes de recurrir al reinicio del navegador. Para un conflicto ajeno, consulta a quien administre esas políticas.</value>
+  </data>
+  <data name="DiagnosticLimits" xml:space="preserve">
+    <value>Este informe no comprueba navegación, caché DNS, políticas de nube/perfil ni políticas específicas de DevTools. Otros navegadores y perfiles de Edge con cuenta Microsoft personal quedan fuera de Solo sitios permitidos. La vigilancia de aplicaciones y sus errores se muestran en la cabecera.</value>
+  </data>
+  <data name="ResourceAssistantTitle" xml:space="preserve">
+    <value>Recursos que no cargan</value>
+  </data>
+  <data name="ResourceInstructionsTitle" xml:space="preserve">
+    <value>Cómo identificar imágenes y archivos que fallan</value>
+  </data>
+  <data name="ResourceInstructions" xml:space="preserve">
+    <value>En el sitio afectado, abre F12 → Red (Network), recarga la página y reproduce el fallo. Copia las URLs de las solicitudes fallidas (una por línea) o exporta HAR (sanitizado) e impórtalo aquí. Si F12 sigue bloqueado, revisa las políticas del navegador.
+
+El análisis es local y no realiza solicitudes de red. Solo conserva dominios y categorías de error en memoria; no guarda el HAR, cabeceras ni rutas. Se consideran candidatas las solicitudes con estado 0, error de red o HTTP 4xx/5xx. Un fallo también puede deberse a autenticación, CORS, cancelación o al servidor. blob:, data:, IPs y otros esquemas se omiten. Selecciona solo los dominios que reconozcas; no se añaden automáticamente.</value>
+  </data>
+  <data name="ResourceUrlPrompt" xml:space="preserve">
+    <value>URLs HTTP/HTTPS fallidas, una por línea</value>
+  </data>
+  <data name="ResourceAnalyze" xml:space="preserve">
+    <value>Analizar URLs</value>
+  </data>
+  <data name="ResourceImportHar" xml:space="preserve">
+    <value>Importar HAR…</value>
+  </data>
+  <data name="ResourceClear" xml:space="preserve">
+    <value>Limpiar análisis</value>
+  </data>
+  <data name="ResourceCandidates" xml:space="preserve">
+    <value>Dominios encontrados</value>
+  </data>
+  <data name="ResourceAddSelected" xml:space="preserve">
+    <value>Permitir seleccionados…</value>
+  </data>
+  <data name="ResourceInvalidHar" xml:space="preserve">
+    <value>El archivo no es un HAR válido con log.entries. Exporta de nuevo el registro de Red.</value>
+  </data>
+  <data name="ResourceTooLarge" xml:space="preserve">
+    <value>El análisis admite como máximo 10 MiB y 10 000 solicitudes o URLs. Exporta un registro más pequeño.</value>
+  </data>
+  <data name="ResourceReadFailed" xml:space="preserve">
+    <value>No se pudo leer el HAR. Revisa el acceso al archivo y vuelve a intentarlo.</value>
+  </data>
+  <data name="ResourceSummary" xml:space="preserve">
+    <value>{0} dominios encontrados; {1} entradas omitidas.</value>
+  </data>
+  <data name="ResourceCaution" xml:space="preserve">
+    <value>No demuestra que Cold Ham haya causado el fallo.</value>
+  </data>
+  <data name="ResourceModeDisabled" xml:space="preserve">
+    <value>Solo sitios permitidos está desactivado: añadir excepciones no cambia el bloqueo actual.</value>
+  </data>
+  <data name="ResourceSelectFirst" xml:space="preserve">
+    <value>Selecciona al menos un dominio que no esté ya cubierto por la lista.</value>
+  </data>
+  <data name="ResourceConfirm" xml:space="preserve">
+    <value>¿Añadir estos dominios a Permitidos?
+
+{0}
+
+Se permitirán el dominio exacto y su variante www, sin otros subdominios. Solo tiene efecto en el modo Solo sitios permitidos. No garantiza resolver el fallo.</value>
+  </data>
+  <data name="ResourceAdded" xml:space="preserve">
+    <value>Asistente: {0} dominios añadidos a Permitidos.</value>
+  </data>
+  <data name="ResourceDetail" xml:space="preserve">
+    <value>{0} solicitudes · {1} · {2}</value>
+  </data>
+  <data name="ResourceCovered" xml:space="preserve">
+    <value>ya cubierto por la lista</value>
+  </data>
+  <data name="ResourceNotCovered" xml:space="preserve">
+    <value>fuera de la lista</value>
+  </data>
+  <data name="ResourceNetworkFailure" xml:space="preserve">
+    <value>fallo de red o solicitud cancelada</value>
+  </data>
+  <data name="ResourceHttpError" xml:space="preserve">
+    <value>HTTP 4xx/5xx; revisa también acceso y servidor</value>
+  </data>
+  <data name="ResourceMixedFailure" xml:space="preserve">
+    <value>errores de red y HTTP; causa sin confirmar</value>
+  </data>
+  <data name="ResourceManualUrl" xml:space="preserve">
+    <value>URL aportada; fallo sin verificar</value>
+  </data>
+  <data name="DiagnosticLoadFailed" xml:space="preserve"><value>No se ha cargado la configuración. Las comparaciones usan el estado provisional y no confirman qué reglas deberían estar activas. Revisa el error de carga antes de reintentar.</value></data>
+  <data name="OpenChromePolicies" xml:space="preserve">
+    <value>Abrir políticas de Chrome</value>
+  </data>
+  <data name="OpenEdgePolicies" xml:space="preserve">
+    <value>Abrir políticas de Edge</value>
+  </data>
+  <data name="BrowserPolicyReloadSteps" xml:space="preserve">
+    <value>Abre la página de políticas sin cerrar las pestañas. Allí pulsa Volver a cargar las políticas (Reload policies) y después recarga la pestaña afectada. Este botón solo abre la página.</value>
+  </data>
+  <data name="BrowserPolicyOpenFailed" xml:space="preserve">
+    <value>No se pudo abrir {0}. Abre {1} en ese navegador, pulsa Volver a cargar las políticas (Reload policies) y recarga la pestaña afectada.</value>
   </data>
 </root>

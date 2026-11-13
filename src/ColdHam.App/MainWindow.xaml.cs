@@ -782,7 +782,9 @@ public partial class MainWindow : Window
         SessionMinutesInput.IsEnabled = StartButton.IsEnabled;
         EndSessionButton.IsEnabled = !_applying && !_saving && state.ManualActive;
         StopButton.IsEnabled = !_applying && !_saving && (state.ManualActive || _configuration.Schedule.Enabled || _effectiveActive || _hostsError is not null || _loadFailed);
-        MainTabs.IsEnabled = !_applying && !_saving && !_loadFailed;
+        MainTabs.IsEnabled = !_applying && !_saving;
+        foreach (System.Windows.Controls.TabItem tab in MainTabs.Items)
+            tab.IsEnabled = !_loadFailed || ReferenceEquals(tab, DiagnosticsTab);
         LanguageSelector.IsEnabled = !_loading && !_applying && !_saving && !_loadFailed;
         AdminBanner.IsEnabled = !_applying && !_saving;
         RecoveryText.Text = string.Join("\n", new[] { _configurationError, _hostsError, _applicationError, _recoveryMessage,
@@ -792,8 +794,8 @@ public partial class MainWindow : Window
             ? Visibility.Visible
             : Visibility.Collapsed;
         EnforcementText.Text = LocalizedText.Get("WebsitesStatusPrefix") + (_hostsError is not null ? LocalizedText.Get("UnconfirmedStatusRulesMayStillBeActive")
-            : _appliedWebRules is null ? LocalizedText.Get("NotChecked") : _appliedWebRules.StartsWith("allow\n", StringComparison.Ordinal) ? LocalizedText.Get("AllowedOnlyPoliciesWrittenRestartChromeEdge")
-            : _appliedWebRules.Length > 0 ? LocalizedText.Get("RulesWrittenToHosts") : LocalizedText.Get("NoActiveRulesRestartTheBrowserIf"))
+            : _appliedWebRules is null ? LocalizedText.Get("NotChecked") : _appliedWebRules.StartsWith("allow\n", StringComparison.Ordinal) ? LocalizedText.Get("AllowedOnlyPoliciesWrittenReloadBrowser")
+            : _appliedWebRules.Length > 0 ? LocalizedText.Get("RulesWrittenToHosts") : LocalizedText.Get("NoActiveRulesReloadBrowserIfNeeded"))
             + LocalizedText.Get("ApplicationsStatusPrefix") + (_configurationError is not null ? LocalizedText.Get("MonitoringSuspended")
                 : _applicationError is not null ? LocalizedText.Get("CheckFailed")
                 : pendingConsent ? LocalizedText.Get("AwaitingAuthorization") : _effectiveActive && _applicationsApproved && _applications.Count > 0 ? LocalizedText.Get("MonitoringDetail") : LocalizedText.Get("NotMonitoring"));
@@ -823,6 +825,7 @@ public partial class MainWindow : Window
         TrayStatus = StatusTitleText.Text + " · " + NextChangeText.Text;
         BlockStateChanged?.Invoke(this, EventArgs.Empty);
         UpdateUpdateStatus();
+        InvalidateTroubleshooting();
     }
 
     private void UpdateRuleStatuses()

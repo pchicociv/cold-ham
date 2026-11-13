@@ -143,7 +143,7 @@
                                                 <TextBlock Text="{DynamicResource DomainAndWwwVariant}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,2,0,0" />
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{Binding StatusBrush}" VerticalAlignment="Center" Margin="20,0" />
-                                            <Button Grid.Column="2" Style="{StaticResource InlineDeleteButton}" Click="RemoveWebsiteItem_Click" />
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal"><Button Style="{StaticResource InlineEditButton}" Click="EditWebsiteItem_Click" /><Button Style="{StaticResource InlineDeleteButton}" Click="RemoveWebsiteItem_Click" /></StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -156,6 +156,7 @@
             </TabItem>
 
             <TabItem Header="{DynamicResource Allowed}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <Grid Margin="24">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -172,8 +173,12 @@
                             <CheckBox x:Name="OnlyAllowedWebsitesToggle" Content="{DynamicResource BlockAllWebsitesExceptTheseChromeAnd}" Margin="0,10,0,0" Click="WebsiteModeChanged" />
                             <TextBlock Text="{DynamicResource DuringASessionOrActiveScheduleOnly}"
                                        TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
-                            <TextBlock Text="{DynamicResource RestartChromeEdgeAfterEnablingOrStopping}"
+                            <TextBlock Text="{DynamicResource ReloadBrowserPoliciesHelp}"
                                        TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}" Margin="0,4,0,0" />
+                            <WrapPanel Margin="0,6,0,0">
+                                <Button Content="{DynamicResource OpenChromePolicies}" Tag="Chrome" Click="OpenBrowserPolicies_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
+                                <Button Content="{DynamicResource OpenEdgePolicies}" Tag="Edge" Click="OpenBrowserPolicies_Click" ToolTip="{DynamicResource BrowserPolicyReloadSteps}"/>
+                            </WrapPanel>
                         </StackPanel>
                         <TextBlock x:Name="AllowedWebsiteCountText" Grid.Column="1" VerticalAlignment="Bottom" Foreground="{StaticResource MutedTextBrush}" />
                     </Grid>
@@ -193,7 +198,7 @@
                                   ToolTip="{DynamicResource IncludeAllSubdomainsHelp}" />
                     </Grid>
                     <Grid Grid.Row="2">
-                        <ListBox x:Name="AllowedWebsiteList" Background="Transparent" BorderThickness="0">
+                        <ListBox x:Name="AllowedWebsiteList" Background="Transparent" BorderThickness="0" MinHeight="110" MaxHeight="280">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="4,11">
@@ -205,7 +210,7 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="{Binding Value}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Value}" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{Binding StatusBrush}" VerticalAlignment="Center" Margin="20,0" />
-                                            <Button Grid.Column="2" Style="{StaticResource InlineDeleteButton}" Click="RemoveAllowedWebsiteItem_Click" />
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal"><Button Style="{StaticResource InlineEditButton}" Click="EditAllowedWebsiteItem_Click" /><Button Style="{StaticResource InlineDeleteButton}" Click="RemoveAllowedWebsiteItem_Click" /></StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -215,6 +220,7 @@
                                    HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" />
                     </Grid>
                 </Grid>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Header="{DynamicResource ApplicationsTab}">
@@ -261,7 +267,7 @@
                                                 <TextBlock Text="{Binding Value}" Foreground="{StaticResource MutedTextBrush}" FontSize="12" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding Status}" Foreground="{Binding StatusBrush}" VerticalAlignment="Center" Margin="20,0" />
-                                            <Button Grid.Column="2" Style="{StaticResource InlineDeleteButton}" Click="RemoveApplicationItem_Click" />
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal"><Button Style="{StaticResource InlineEditButton}" Click="EditApplicationItem_Click" /><Button Style="{StaticResource InlineDeleteButton}" Click="RemoveApplicationItem_Click" /></StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -323,6 +329,57 @@
                         <TextBlock Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Text="{DynamicResource EditingTheHostsFileRequiresAdministratorPermissions}" />
                     </StackPanel>
                 </ScrollViewer>
+            </TabItem>
+            <TabItem x:Name="DiagnosticsTab" Header="{DynamicResource DiagnosticsTitle}">
+                <TabControl Margin="12">
+                    <TabItem Header="{DynamicResource DiagnosticStateTab}">
+                        <Grid Margin="12">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <TextBlock Text="{DynamicResource DiagnosticIntro}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                            <WrapPanel Grid.Row="1" Margin="0,0,0,10">
+                                <Button x:Name="RefreshDiagnosticButton" Content="{DynamicResource DiagnosticRefresh}" Click="RefreshDiagnostic_Click"/>
+                                <Button Content="{DynamicResource OpenChromePolicies}" Tag="Chrome" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="OpenBrowserPolicies_Click"/>
+                                <Button Content="{DynamicResource OpenEdgePolicies}" Tag="Edge" ToolTip="{DynamicResource BrowserPolicyReloadSteps}" Click="OpenBrowserPolicies_Click"/>
+                            </WrapPanel>
+                            <TextBox x:Name="DiagnosticReport" Grid.Row="2" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                     Text="{DynamicResource DiagnosticRefreshNeeded}" AutomationProperties.Name="{DynamicResource DiagnosticStateTab}"/>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="{DynamicResource ResourceAssistantTitle}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid Margin="12">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <Expander Header="{DynamicResource ResourceInstructionsTitle}" Margin="0,0,0,6">
+                                <ScrollViewer MaxHeight="115" VerticalScrollBarVisibility="Auto"><TextBlock Text="{DynamicResource ResourceInstructions}" TextWrapping="Wrap" Margin="4,6"/></ScrollViewer>
+                            </Expander>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="{DynamicResource ResourceUrlPrompt}" Margin="0,0,0,3"/>
+                                <TextBox x:Name="ResourceUrls" Height="50" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                         ToolTip="{DynamicResource ResourceUrlPrompt}" AutomationProperties.Name="{DynamicResource ResourceUrlPrompt}"/>
+                            </StackPanel>
+                            <WrapPanel Grid.Row="2" Margin="0,6,0,6">
+                                <Button Content="{DynamicResource ResourceAnalyze}" Click="AnalyzeResourceUrls_Click"/>
+                                <Button Content="{DynamicResource ResourceImportHar}" Click="ImportResourceHar_Click"/>
+                                <Button Content="{DynamicResource ResourceClear}" Click="ClearResourceAnalysis_Click"/>
+                            </WrapPanel>
+                            <TextBlock x:Name="ResourceSummary" Grid.Row="3" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                            <ListBox x:Name="ResourceResultList" Grid.Row="4" MinHeight="110" MaxHeight="260" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     HorizontalContentAlignment="Stretch" AutomationProperties.Name="{DynamicResource ResourceCandidates}">
+                                <ListBox.ItemTemplate><DataTemplate>
+                                    <Grid Margin="2,5">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                        <CheckBox IsChecked="{Binding Selected}" IsEnabled="{Binding CanSelect}" VerticalAlignment="Top" Margin="0,2,10,0" AutomationProperties.Name="{Binding Domain}"/>
+                                        <StackPanel Grid.Column="1"><TextBlock Text="{Binding Domain}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" Foreground="{StaticResource MutedTextBrush}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate></ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button Grid.Row="5" Content="{DynamicResource ResourceAddSelected}" HorizontalAlignment="Left" Margin="0,8,0,0" Click="AddResourceDomains_Click"/>
+                        </Grid>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
             </TabItem>
         </TabControl>
 

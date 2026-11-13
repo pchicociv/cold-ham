@@ -134,6 +134,30 @@ internal static class BrowserPolicyTests
         Check((await store.LoadAsync()).WebsiteMode == WebsiteBlockingMode.BlockListedSites, "Migration must never opt users into deny-all.");
     }
 
+    public static async Task Inspection()
+    {
+        using var fixture = new Fixture();
+        var inactive = await fixture.Manager.InspectAsync(false, []);
+        Check(inactive.Entries.All(entry => entry.MatchesExpected && entry.ValueCount == 0)
+            && !inactive.RecoveryJournalPresent && fixture.Registry.Writes == 0, "An inspection must not create policies or journals.");
+        await fixture.Manager.ApplyAsync(["*.example.com"]);
+        var journal = await File.ReadAllBytesAsync(fixture.Journal);
+        var writes = fixture.Registry.Writes;
+        var applied = await fixture.Manager.InspectAsync(true, ["*.example.com"]);
+        Check(applied.RecoveryJournalPresent && applied.Entries.All(entry => entry.MatchesExpected && entry.ForeignValues == 0), "Matching owned policies must be identified.");
+        Check((await fixture.Manager.InspectAsync(true, ["other.com"])).Entries.Any(entry => !entry.MatchesExpected), "Changed configuration must not be reported as applied.");
+        Check((await fixture.Manager.InspectAsync(false, [])).Entries.All(entry => !entry.MatchesExpected), "Stopped sessions with remaining values need cleanup.");
+        fixture.Registry.Values[BrowserPolicyManager.PolicyPaths[1]]["1"] = "external.com";
+        fixture.Registry.MachinePolicy = true;
+        var conflict = await fixture.Manager.InspectAsync(true, ["*.example.com"]);
+        Check(conflict.Entries[1].ForeignValues == 1 && conflict.Entries.All(entry => entry.MachinePolicy), "Changed values and machine policies must be surfaced.");
+        Check((await File.ReadAllBytesAsync(fixture.Journal)).SequenceEqual(journal) && fixture.Registry.Writes == writes
+            && Equals(fixture.Registry.Values[BrowserPolicyManager.PolicyPaths[1]]["1"], "external.com"), "Inspection must preserve registry values and ownership journal.");
+        await File.WriteAllTextAsync(fixture.Journal, "{broken");
+        await ExpectAsync<InvalidDataException>(() => fixture.Manager.InspectAsync(false, []));
+        Check(await File.ReadAllTextAsync(fixture.Journal) == "{broken", "Corrupt recovery data must remain intact during diagnosis.");
+    }
+
     private static void Check(bool condition, string message)
     {
         if (!condition) throw new InvalidOperationException(message);

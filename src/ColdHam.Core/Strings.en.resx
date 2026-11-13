@@ -87,7 +87,7 @@
     <value>Allowed website added: {0}</value>
   </data>
   <data name="DuringASessionOrActiveScheduleWebsites" xml:space="preserve">
-    <value>During a session or active schedule, websites outside the allowed list will be blocked in Chrome and Edge. An empty list blocks all websites. Other browsers and personal Microsoft account profiles in Edge are outside this mode. Restart the browser to load or remove policies. Enable this mode?</value>
+    <value>During a session or active schedule, websites outside the allowed list will be blocked in Chrome and Edge. An empty list blocks all websites. Other browsers and personal Microsoft account profiles in Edge are outside this mode. To update rules without closing the browser, open its policy page, click Reload policies and reload the affected tabs. Enable this mode?</value>
   </data>
   <data name="AllowedWebsitesOnly" xml:space="preserve">
     <value>Allowed websites only</value>
@@ -141,13 +141,13 @@
     <value>The session has ended; the schedule may keep blocking active.</value>
   </data>
   <data name="AllowOnlyPoliciesWrittenForChromeAnd" xml:space="preserve">
-    <value>Allow-only policies written for Chrome and Edge. Restart the browser and check chrome://policy or edge://policy.</value>
+    <value>Allow-only rules written for Chrome and Edge. To use them now, click Reload policies at chrome://policy or edge://policy and reload the affected tab.</value>
   </data>
   <data name="WroteWebRuleSToHosts" xml:space="preserve">
     <value>Wrote {0} web rule(s) to hosts.</value>
   </data>
   <data name="RemovalOfColdHamWebRulesVerified" xml:space="preserve">
-    <value>Removal of Cold Ham web rules verified. Restart the browser if you used Allowed websites only mode.</value>
+    <value>Removal of Cold Ham web rules verified. If you used Allowed websites only, reload browser policies and the affected tabs.</value>
   </data>
   <data name="CouldNotApplyOrRemoveWebRules" xml:space="preserve">
     <value>Could not apply or remove web rules. If hosts permissions are missing, restart as administrator and click Retry. If your organization manages browser policies, contact its administrator.</value>
@@ -258,14 +258,14 @@ Save your work before continuing. Authorize these closures? If you choose No, we
   <data name="NotChecked" xml:space="preserve">
     <value>not checked</value>
   </data>
-  <data name="AllowedOnlyPoliciesWrittenRestartChromeEdge" xml:space="preserve">
-    <value>allowed only: policies written; restart Chrome/Edge</value>
+  <data name="AllowedOnlyPoliciesWrittenReloadBrowser" xml:space="preserve">
+    <value>allowed only: rules written; reload policies from Allowed, then reload the tab</value>
   </data>
   <data name="RulesWrittenToHosts" xml:space="preserve">
     <value>rules written to hosts</value>
   </data>
-  <data name="NoActiveRulesRestartTheBrowserIf" xml:space="preserve">
-    <value>no active rules; restart the browser if you used Allowed websites only</value>
+  <data name="NoActiveRulesReloadBrowserIfNeeded" xml:space="preserve">
+    <value>no active rules; if blocking persists, reload policies and the tab</value>
   </data>
   <data name="ApplicationsStatusPrefix" xml:space="preserve">
     <value> · Applications: </value>
@@ -561,8 +561,8 @@ Save your work before continuing. Authorize these closures? If you choose No, we
   <data name="DuringASessionOrActiveScheduleOnly" xml:space="preserve">
     <value>During a session or active schedule, only these entries are allowed. *.example.com includes the domain and all its subdomains; without *., only the domain and its www variant are included. An empty list blocks all websites.</value>
   </data>
-  <data name="RestartChromeEdgeAfterEnablingOrStopping" xml:space="preserve">
-    <value>Restart Chrome/Edge after enabling or stopping this mode. Other browsers and Edge profiles with personal Microsoft accounts are not covered.</value>
+  <data name="ReloadBrowserPoliciesHelp" xml:space="preserve">
+    <value>To update rules without closing the browser: open policies, click Reload policies, then reload the affected tab.</value>
   </data>
   <data name="AllowedDomainForExampleExampleCom" xml:space="preserve">
     <value>Allowed domain: example.com. To include all its subdomains, select the checkbox or enter *.example.com.</value>
@@ -652,7 +652,7 @@ Save your work before continuing. Authorize these closures? If you choose No, we
     <value>Cold Ham blocks exact domains and their www variants using the Windows hosts file. It cannot filter specific paths, searches or all subdomains.</value>
   </data>
   <data name="InAllowedYouCanEnableAllowedWebsites" xml:space="preserve">
-    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. When adding a domain, select Include all subdomains or enter *.example.com to allow its subdomains at any depth. Without that option, the domain and its www variant are allowed. It does not include other domains the site uses for images or files; add those separately. Restart the browser after changes and check policies at chrome://policy or edge://policy. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages and developer tools remain available.</value>
+    <value>In Allowed, you can enable Allowed websites only for Chrome and Edge: it blocks other websites and replaces the blocked website list during a session or schedule. When adding a domain, select Include all subdomains or enter *.example.com to allow its subdomains at any depth. Without that option, the domain and its www variant are allowed. It does not include other domains the site uses for images or files; add those separately. After changes, use Open Chrome or Edge policies in Allowed, click Reload policies and reload the affected tab. Normal policy reloads do not require closing the browser. Check URLBlocklist and URLAllowlist: writing rules does not verify that the browser has read them. Other browsers, applications and Edge profiles with personal Microsoft accounts are not covered. Existing policies from other tools are not overwritten. Internal browser pages and developer tools remain available.</value>
   </data>
   <data name="ColdHamMonitorsConfiguredProcessesWhileThe" xml:space="preserve">
     <value>Cold Ham monitors configured processes while the application is open. When blocking starts, any matching application will be closed and unsaved work may be lost.</value>
@@ -755,5 +755,221 @@ Save your work before continuing. Authorize these closures? If you choose No, we
   </data>
   <data name="UpdateWaiting" xml:space="preserve">
     <value>Waiting: finish blocks, resolve warnings and save or clear pending fields. Restart is deferred near the next scheduled block.</value>
+  </data>
+  <data name="RuleEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="RuleEditTitle" xml:space="preserve">
+    <value>Edit rule</value>
+  </data>
+  <data name="RuleEditValue" xml:space="preserve">
+    <value>Domain or executable</value>
+  </data>
+  <data name="RuleEditSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="RuleEditCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="RuleEditWebsitePrompt" xml:space="preserve">
+    <value>Edit the domain. The change will apply to the active session after saving.</value>
+  </data>
+  <data name="RuleEditApplicationPrompt" xml:space="preserve">
+    <value>Edit the executable name or path. Process termination requires consent.</value>
+  </data>
+  <data name="RuleEditDuplicate" xml:space="preserve">
+    <value>Another entry already has that rule.</value>
+  </data>
+  <data name="RuleEditConfirm" xml:space="preserve">
+    <value>Replace this rule?
+
+{0}
+→ {1}
+
+The change will also apply to active blocks.</value>
+  </data>
+  <data name="RuleEditApplied" xml:space="preserve">
+    <value>Rule edited: {0} → {1}</value>
+  </data>
+  <data name="DiagnosticsTitle" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="DiagnosticStateTab" xml:space="preserve">
+    <value>Block status</value>
+  </data>
+  <data name="DiagnosticIntro" xml:space="preserve">
+    <value>Inspect local files and policies without changing them. A written rule does not prove the browser has loaded it.</value>
+  </data>
+  <data name="DiagnosticRefresh" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="DiagnosticRefreshNeeded" xml:space="preserve">
+    <value>Click “Check now” for a current diagnosis. Rule or session changes invalidate the previous report.</value>
+  </data>
+  <data name="DiagnosticTime" xml:space="preserve">
+    <value>Checked: {0} (snapshot; check again to refresh).</value>
+  </data>
+  <data name="DiagnosticActive" xml:space="preserve">
+    <value>Session or schedule active: blocking rules are expected.</value>
+  </data>
+  <data name="DiagnosticInactive" xml:space="preserve">
+    <value>No active session or schedule: no Cold Ham rules are expected.</value>
+  </data>
+  <data name="DiagnosticSaved" xml:space="preserve">
+    <value>In-memory settings: no known save errors.</value>
+  </data>
+  <data name="DiagnosticSaveFailed" xml:space="preserve">
+    <value>Changes on disk are unconfirmed. Review the save error and click Retry.</value>
+  </data>
+  <data name="DiagnosticHosts" xml:space="preserve">
+    <value>Hosts file: {0}</value>
+  </data>
+  <data name="DiagnosticHostsMatch" xml:space="preserve">
+    <value>The owned section matches the expected rules.</value>
+  </data>
+  <data name="DiagnosticHostsMismatch" xml:space="preserve">
+    <value>The owned section differs. Click Retry; if permission is missing, restart Cold Ham as administrator.</value>
+  </data>
+  <data name="DiagnosticHostsPresent" xml:space="preserve">
+    <value>Cold Ham's section is present.</value>
+  </data>
+  <data name="DiagnosticHostsAbsent" xml:space="preserve">
+    <value>Cold Ham's section is absent.</value>
+  </data>
+  <data name="DiagnosticExternalHosts" xml:space="preserve">
+    <value>Other mapping lines in hosts: {0}. They are preserved and may affect allowed sites.</value>
+  </data>
+  <data name="DiagnosticReadFailed" xml:space="preserve">
+    <value>Could not inspect {0}: {1}</value>
+  </data>
+  <data name="DiagnosticPolicyConflict" xml:space="preserve">
+    <value>External or machine policies exist. Cold Ham does not overwrite them.</value>
+  </data>
+  <data name="DiagnosticPolicyWritten" xml:space="preserve">
+    <value>Owned rules written and matching; browser loading not verified.</value>
+  </data>
+  <data name="DiagnosticPolicyAbsent" xml:space="preserve">
+    <value>No user URL policy values; no owned rules expected.</value>
+  </data>
+  <data name="DiagnosticPolicyMismatch" xml:space="preserve">
+    <value>Rules are missing or differ from expectations. Click Retry.</value>
+  </data>
+  <data name="DiagnosticPolicyCounts" xml:space="preserve">
+    <value>User values: {0}; external or modified: {1}; machine URL policy: {2}.</value>
+  </data>
+  <data name="DiagnosticYes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="DiagnosticNo" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="DiagnosticJournalActive" xml:space="preserve">
+    <value>Ownership journal present: enables removal of the session's policies.</value>
+  </data>
+  <data name="DiagnosticJournalPending" xml:space="preserve">
+    <value>An ownership journal remains with no block expected. Click Retry to finish cleanup.</value>
+  </data>
+  <data name="DiagnosticJournalAbsent" xml:space="preserve">
+    <value>No policy journal remains.</value>
+  </data>
+  <data name="DiagnosticNextSteps" xml:space="preserve">
+    <value>Open Chrome or Edge policies using the buttons above and click Reload policies. Inspect URLBlocklist and URLAllowlist, their status and source, then reload the affected tab. Try an allowed and a blocked site. If policies do not update, check conflicts before resorting to a browser restart. For external conflicts, contact whoever manages those policies.</value>
+  </data>
+  <data name="DiagnosticLimits" xml:space="preserve">
+    <value>This report does not test browsing, DNS cache, cloud/profile policies or DevTools-specific policies. Other browsers and Edge profiles with personal Microsoft accounts are outside Allowed websites only. Application monitoring and its errors are shown in the header.</value>
+  </data>
+  <data name="ResourceAssistantTitle" xml:space="preserve">
+    <value>Missing resources</value>
+  </data>
+  <data name="ResourceInstructionsTitle" xml:space="preserve">
+    <value>How to identify failing images and files</value>
+  </data>
+  <data name="ResourceInstructions" xml:space="preserve">
+    <value>On the affected site, open F12 → Network, reload the page and reproduce the failure. Copy failing request URLs (one per line), or export HAR (sanitized) and import it here. If F12 is still blocked, inspect browser policies.
+
+Analysis is local and makes no network requests. Only domains and error categories are kept in memory; HAR files, headers and paths are not stored. Candidates have status 0, a network error or HTTP 4xx/5xx. Failures may also involve authentication, CORS, cancellation or the server. blob:, data:, IPs and other schemes are skipped. Select only domains you recognize; none are added automatically.</value>
+  </data>
+  <data name="ResourceUrlPrompt" xml:space="preserve">
+    <value>Failing HTTP/HTTPS URLs, one per line</value>
+  </data>
+  <data name="ResourceAnalyze" xml:space="preserve">
+    <value>Analyze URLs</value>
+  </data>
+  <data name="ResourceImportHar" xml:space="preserve">
+    <value>Import HAR…</value>
+  </data>
+  <data name="ResourceClear" xml:space="preserve">
+    <value>Clear analysis</value>
+  </data>
+  <data name="ResourceCandidates" xml:space="preserve">
+    <value>Discovered domains</value>
+  </data>
+  <data name="ResourceAddSelected" xml:space="preserve">
+    <value>Allow selected…</value>
+  </data>
+  <data name="ResourceInvalidHar" xml:space="preserve">
+    <value>The file is not a valid HAR with log.entries. Export the Network log again.</value>
+  </data>
+  <data name="ResourceTooLarge" xml:space="preserve">
+    <value>Analysis supports up to 10 MiB and 10,000 requests or URLs. Export a smaller log.</value>
+  </data>
+  <data name="ResourceReadFailed" xml:space="preserve">
+    <value>Could not read the HAR. Check file access and try again.</value>
+  </data>
+  <data name="ResourceSummary" xml:space="preserve">
+    <value>{0} domains found; {1} entries skipped.</value>
+  </data>
+  <data name="ResourceCaution" xml:space="preserve">
+    <value>This does not prove Cold Ham caused the failure.</value>
+  </data>
+  <data name="ResourceModeDisabled" xml:space="preserve">
+    <value>Allowed websites only is disabled: adding exceptions does not change the current blocking.</value>
+  </data>
+  <data name="ResourceSelectFirst" xml:space="preserve">
+    <value>Select at least one domain not already covered by the list.</value>
+  </data>
+  <data name="ResourceConfirm" xml:space="preserve">
+    <value>Add these domains to Allowed?
+
+{0}
+
+The exact domain and its www variant will be allowed, without other subdomains. This only takes effect in Allowed websites only mode. It does not guarantee fixing the failure.</value>
+  </data>
+  <data name="ResourceAdded" xml:space="preserve">
+    <value>Assistant: {0} domains added to Allowed.</value>
+  </data>
+  <data name="ResourceDetail" xml:space="preserve">
+    <value>{0} requests · {1} · {2}</value>
+  </data>
+  <data name="ResourceCovered" xml:space="preserve">
+    <value>already covered by the list</value>
+  </data>
+  <data name="ResourceNotCovered" xml:space="preserve">
+    <value>outside the list</value>
+  </data>
+  <data name="ResourceNetworkFailure" xml:space="preserve">
+    <value>network failure or cancelled request</value>
+  </data>
+  <data name="ResourceHttpError" xml:space="preserve">
+    <value>HTTP 4xx/5xx; also check access and server</value>
+  </data>
+  <data name="ResourceMixedFailure" xml:space="preserve">
+    <value>network and HTTP errors; cause unconfirmed</value>
+  </data>
+  <data name="ResourceManualUrl" xml:space="preserve">
+    <value>supplied URL; failure not verified</value>
+  </data>
+  <data name="DiagnosticLoadFailed" xml:space="preserve"><value>Settings could not be loaded. Comparisons use provisional state and cannot confirm which rules should be active. Review the load error before retrying.</value></data>
+  <data name="OpenChromePolicies" xml:space="preserve">
+    <value>Open Chrome policies</value>
+  </data>
+  <data name="OpenEdgePolicies" xml:space="preserve">
+    <value>Open Edge policies</value>
+  </data>
+  <data name="BrowserPolicyReloadSteps" xml:space="preserve">
+    <value>Opens the policy page without closing tabs. Click Reload policies there, then reload the affected tab. This button only opens the page.</value>
+  </data>
+  <data name="BrowserPolicyOpenFailed" xml:space="preserve">
+    <value>Could not open {0}. Open {1} in that browser, click Reload policies, then reload the affected tab.</value>
   </data>
 </root>

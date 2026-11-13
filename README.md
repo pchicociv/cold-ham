@@ -47,7 +47,7 @@ Standard website blocking manages only the section between `# Cold Ham BEGIN` an
 
 Blocked rules cover exact domains and their `www` variants. Add other subdomains separately. Hosts-file blocking does not filter individual URL paths, searches, or every subdomain automatically.
 
-**Allowed websites only** replaces the blocked website list with Chrome and Edge policies during an active session or schedule. An empty allowed list blocks all website navigation covered by those policies. Restart the browser after applying or removing policies, and inspect `chrome://policy` or `edge://policy` if necessary.
+**Allowed websites only** replaces the blocked website list with Chrome and Edge policies during an active session or schedule. An empty allowed list blocks all website navigation covered by those policies. After changing, applying or removing rules, use **Open Chrome policies** or **Open Edge policies** in **Allowed** or **Diagnostics**, click **Reload policies** in the browser, then reload the affected tab. Normal policy reloads do not require closing the browser. The buttons open `chrome://policy` or `edge://policy` in the selected browser; they do not press Reload policies or verify browser enforcement. If a browser cannot be located or opened, the app shows its address for manual navigation. Check the source, status and values of `URLBlocklist` and `URLAllowlist` if changes are not reflected.
 
 In **Allowed**, select **Include all subdomains** before adding a domain, or enter `*.example.com`. This allows the main domain and all nested subdomains, such as `files.example.com` and `a.b.example.com`. Without the option, entries keep allowing only the exact domain and its `www` variant. Existing entries keep their previous scope. To broaden an existing entry, add it again with the option selected; remove the exact entry if it is no longer needed. Other domains used by a site still need their own entries: `*.chatgpt.com` does not include `*.oaiusercontent.com` or `*.oaistatic.com`.
 
@@ -55,7 +55,18 @@ Settings use version 4 to preserve this distinction. Earlier settings migrate wi
 
 This mode does not cover other browsers, other applications, or Edge profiles using personal Microsoft accounts. Internal browser pages and developer tools remain available; Cold Ham includes a `devtools://*` exception so its global URL block does not block the developer tools frontend. Separate organization policies can still restrict developer tools. Cold Ham refuses conflicting existing browser URL policies and removes only policy values it owns.
 
-### Applications
+### Editing rules and troubleshooting
+
+Use **Edit** beside a blocked website, allowed website or application to replace that entry. Allowed rules expose **Include all subdomains** in the editor. Changes are validated for duplicates, protected executables and browser policy limits before confirmation. Saved changes are reconciled with active sessions; application changes still require process-termination consent. A failed save restores the previous entry instead of applying an unsaved rule.
+
+The **Diagnostics** tab contains two tools:
+
+- **Block status → Check now** reads Cold Ham's hosts section, current-user Chrome/Edge URL policies, machine-policy presence and the ownership journal without modifying them. It reports discrepancies, foreign values, pending cleanup and existing save/enforcement errors. It provides the next steps for Retry, administrator permissions and browser policy refresh. This is a timestamped snapshot; it does not prove the browser has loaded its policies or test actual navigation. Cloud/profile and DevTools-specific policies must be inspected in `chrome://policy` or `edge://policy`; the buttons open the selected browser's policy page.
+- **Missing resources** analyzes pasted HTTP/HTTPS request URLs or an imported HAR locally, without making network requests. In the browser's Network panel, reproduce the failure and export a [sanitized HAR](https://developer.chrome.com/docs/devtools/network/reference#save-as-har). The assistant groups requests with network errors, status 0 or HTTP 4xx/5xx by domain and marks domains already covered by Allowed. Select the domains you recognize and confirm the additions. No candidate is selected automatically. HTTP errors may involve authentication or the server; a candidate is not proof that Cold Ham caused the failure. Imported requests that succeeded, malformed entries, IP addresses, `blob:`, `data:` and non-HTTP(S) URLs are skipped.
+
+HAR analysis supports at most 10 MiB and 10,000 entries. Only domain names, counts and error categories remain in the analysis result; headers, query strings, paths and response bodies are not saved. **Clear analysis** discards the results. Added domains use the exact-domain and `www` behavior; use Edit to broaden an entry explicitly. Adding entries does not enable Allowed websites only mode or start a session. Pending analysis defers automatic-update restarts.
+
+### Application enforcement
 
 Cold Ham periodically detects and closes processes matching the configured executable names or full paths. Authorization covers the current rule set, including future launches during the active blocking period. Cold Ham itself, protected Windows processes, and unsafe or wildcard rules are excluded.
 
